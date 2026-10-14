@@ -5,7 +5,7 @@ A directory of agent skills by Steve Solun. A **skill** is a folder with a `SKIL
 Every skill here follows the same rules:
 
 - **One job.** Each folder does one thing and says in its description exactly when it should and should not fire.
-- **Measured, not preached.** Where a skill makes a claim about tokens, time or correctness, it ships the script that measures it and reports before and after numbers.
+- **Numbers, not advice.** Where a skill makes a claim about tokens, time or correctness, it ships the script that measures it and reports before and after numbers.
 - **Fixes live in the environment.** A skill leaves behind a flag, a script, a check or a config, never a paragraph in a steering file that every session has to re-read.
 - **One copy, every harness.** Written to the open [Agent Skills](https://agentskills.io) format, with Codex and ChatGPT picker metadata beside it, so the same folder works in Claude Code, Codex, ChatGPT, Copilot, Cursor and anything else that reads the standard.
 
