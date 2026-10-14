@@ -33,7 +33,7 @@ The CLI asks which agents to install for and puts the files where each one looks
 
 ```bash
 npx skills@latest add stevesolun/steveskills --skill=tool-diet -g            # user-wide instead of this project
-npx skills@latest add stevesolun/steveskills --skill=tool-diet -a claude-code,codex -y
+npx skills@latest add stevesolun/steveskills --skill=tool-diet -a claude-code -a codex -y   # pick agents, skip prompts
 npx skills@latest add stevesolun/steveskills --list                          # see every skill in this repo
 npx skills@latest update tool-diet                                           # pull the latest version
 ```
