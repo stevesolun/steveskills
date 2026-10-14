@@ -1,0 +1,17 @@
+{
+  "name": "steveskills",
+  "owner": {
+    "name": "Steve Solun",
+    "url": "https://github.com/stevesolun"
+  },
+  "description": "Steve Solun's agent skills, as an installable Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "steveskills",
+      "source": "./",
+      "description": "tool-diet: measure the fat in a session's tool results, cut it at the source, prove the saving.",
+      "category": "productivity",
+      "keywords": ["skills", "tokens", "context", "tool-results", "mcp"]
+    }
+  ]
+}

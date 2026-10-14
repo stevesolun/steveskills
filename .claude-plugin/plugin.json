@@ -1,0 +1,14 @@
+{
+  "name": "steveskills",
+  "version": "1.0.0",
+  "description": "Steve Solun's agent skills. tool-diet: measure which tool, CLI, script or MCP results in a session cost the most tokens for the least use, cut the fat at its source, prove the saving.",
+  "author": {
+    "name": "Steve Solun",
+    "url": "https://github.com/stevesolun"
+  },
+  "homepage": "https://github.com/stevesolun/steveskills",
+  "repository": "https://github.com/stevesolun/steveskills",
+  "license": "MIT",
+  "keywords": ["skills", "tokens", "context", "tool-results", "mcp", "agent"],
+  "skills": ["./skills/tool-diet"]
+}
