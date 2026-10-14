@@ -9,6 +9,15 @@
   "homepage": "https://github.com/stevesolun/steveskills",
   "repository": "https://github.com/stevesolun/steveskills",
   "license": "MIT",
-  "keywords": ["skills", "tokens", "context", "tool-results", "mcp", "agent"],
-  "skills": ["./skills/tool-diet"]
+  "keywords": [
+    "skills",
+    "tokens",
+    "context",
+    "tool-results",
+    "mcp",
+    "agent"
+  ],
+  "skills": [
+    "./tool-diet"
+  ]
 }
