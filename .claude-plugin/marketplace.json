@@ -9,9 +9,15 @@
     {
       "name": "steveskills",
       "source": "./",
-      "description": "tool-diet: measure the fat in a session's tool results, cut it at the source, prove the saving.",
+      "description": "Steve Solun's agent skills: one folder per skill, each a SKILL.md plus the scripts it needs, measured rather than preached.",
       "category": "productivity",
-      "keywords": ["skills", "tokens", "context", "tool-results", "mcp"]
+      "keywords": [
+        "skills",
+        "agent-skills",
+        "claude-code",
+        "codex",
+        "chatgpt"
+      ]
     }
   ]
 }

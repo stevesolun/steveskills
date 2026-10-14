@@ -1,7 +1,7 @@
 {
   "name": "steveskills",
   "version": "1.0.0",
-  "description": "Steve Solun's agent skills. tool-diet: measure which tool, CLI, script or MCP results in a session cost the most tokens for the least use, cut the fat at its source, prove the saving.",
+  "description": "Steve Solun's agent skills: one folder per skill, each a SKILL.md plus the scripts it needs, measured rather than preached. Works in Claude Code, Codex, ChatGPT, Copilot and Cursor.",
   "author": {
     "name": "Steve Solun",
     "url": "https://github.com/stevesolun"
@@ -11,11 +11,11 @@
   "license": "MIT",
   "keywords": [
     "skills",
-    "tokens",
-    "context",
-    "tool-results",
-    "mcp",
-    "agent"
+    "agent-skills",
+    "claude-code",
+    "codex",
+    "chatgpt",
+    "productivity"
   ],
   "skills": [
     "./tool-diet"
