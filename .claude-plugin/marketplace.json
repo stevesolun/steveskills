@@ -9,7 +9,7 @@
     {
       "name": "steveskills",
       "source": "./",
-      "description": "Steve Solun's agent skills: one folder per skill, each a SKILL.md plus the scripts it needs, measured rather than preached.",
+      "description": "Steve Solun's agent skills: one folder per skill, each a SKILL.md plus the scripts it needs, with numbers behind every claim.",
       "category": "productivity",
       "keywords": [
         "skills",
