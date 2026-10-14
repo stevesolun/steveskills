@@ -26,10 +26,10 @@ Pick one route per agent. Installing a skill twice makes it show up twice.
 ### Any agent, with the skills CLI
 
 ```bash
-npx skills@latest add stevesolun/steveskills --skill=tool-diet
+npx skills@latest add stevesolun/steveskills --skill=<skill>
 ```
 
-The CLI asks which agents to install for and puts the files where each one looks. Useful flags:
+The CLI asks which agents to install for and puts the files where each one looks. With `tool-diet` as the example:
 
 ```bash
 npx skills@latest add stevesolun/steveskills --skill=tool-diet -g            # user-wide instead of this project
@@ -45,13 +45,15 @@ claude plugin marketplace add stevesolun/steveskills
 claude plugin install steveskills@steveskills
 ```
 
+One install brings every skill in this directory, and new folders arrive with the next update.
+
 ### Codex and ChatGPT
 
 Codex reads `.agents/skills/` in a repo and `~/.agents/skills/` for the user, and the ChatGPT desktop app reads the same standalone skills. The skills CLI above writes there when you pick Codex. By hand:
 
 ```bash
 git clone --depth 1 https://github.com/stevesolun/steveskills /tmp/steveskills
-mkdir -p ~/.agents/skills && cp -r /tmp/steveskills/tool-diet ~/.agents/skills/
+mkdir -p ~/.agents/skills && cp -r /tmp/steveskills/<skill> ~/.agents/skills/   # e.g. tool-diet
 ```
 
 Restart Codex if the skill does not show up in `/skills`.
@@ -62,15 +64,15 @@ Copy a skill folder into your agent's skills directory (Claude Code: `.claude/sk
 
 ## Use
 
-Each skill is **model-invoked**: the agent reaches for it on its own when the task matches the skill's description. You can also call it by name.
+Each skill is **model-invoked**: the agent reaches for it on its own when the task matches the skill's description. You can also call any skill by name:
 
 | Harness | Explicit call |
 | --- | --- |
-| Claude Code | `/tool-diet` (or `/steveskills:tool-diet` when installed as the plugin) |
-| Codex CLI and IDE | `$tool-diet`, or pick it from `/skills` |
-| ChatGPT desktop | type `@` and pick `tool-diet` |
+| Claude Code | `/<skill>` (or `/steveskills:<skill>` when installed as the plugin) |
+| Codex CLI and IDE | `$<skill>`, or pick it from `/skills` |
+| ChatGPT desktop | type `@` and pick the skill |
 
-Prompts that make the agent reach for `tool-diet` without being told:
+Example, with `tool-diet`. Prompts that make the agent reach for it without being told:
 
 ```text
 Why did this session burn 300K tokens? Find the waste and fix it.
