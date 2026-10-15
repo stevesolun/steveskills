@@ -16,6 +16,7 @@ The directory grows one folder at a time. The table below is the index.
 | Skill | What it does |
 | --- | --- |
 | [tool-diet](./tool-diet) | Puts tool results on a diet. Measures which tool, CLI, script or MCP results in a session cost the most tokens for the least use, cuts the fat at its source, and proves the saving with before and after numbers. |
+| [deeper](./deeper) | Rewrites a task for expert depth, not size. Names the raw inputs, instruments and outside check a top practitioner would use, rewrites the prompt to ask for exactly that, counts the depth markers before and after, and runs it against that check. |
 
 More folders will land here. Each one carries its own README with details and sample output.
 
