@@ -1,0 +1,3 @@
+interface:
+  display_name: "Red at Base"
+  short_description: "Rerun new tests at the base commit: N of M fail there"

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Structure Map"
+  short_description: "Repo facts the tree does not show, each with a proof command"
