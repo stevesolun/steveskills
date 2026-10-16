@@ -1,0 +1,3 @@
+interface:
+  display_name: "Acceptance Probes"
+  short_description: "Criteria as probes: red at start, green at end"

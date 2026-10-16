@@ -17,6 +17,9 @@ The directory grows one folder at a time. The table below is the index.
 | --- | --- |
 | [tool-diet](./tool-diet) | Puts tool results on a diet. Measures which tool, CLI, script or MCP results in a session cost the most tokens for the least use, cuts the fat at its source, and proves the saving with before and after numbers. |
 | [deeper](./deeper) | Rewrites a task for expert depth, not size. Names the raw inputs, instruments and outside check a top practitioner would use, rewrites the prompt to ask for exactly that, counts the depth markers before and after, and runs it against that check. |
+| [acceptance-probes](./acceptance-probes) | Turns a ticket's acceptance criteria into runnable probes before any implementation, proves each probe fails at the start commit, freezes the probes, and reruns them to accept the work as a count. |
+| [reconcile](./reconcile) | Closes a session by reconciling git, the tracker and the transcript's own claims into a discrepancy table, acting only on what you confirm, and ending with the next piece of work. |
+| [decision-ledger](./decision-ledger) | Keeps an append-only ledger of settled decisions with their source and audits each spec, ticket set or PR against it before publishing, so no decision is lost between phases and none is re-asked. |
 
 More folders will land here. Each one carries its own README with details and sample output.
 
@@ -73,21 +76,17 @@ Each skill is **model-invoked**: the agent reaches for it on its own when the ta
 | Codex CLI and IDE | `$<skill>`, or pick it from `/skills` |
 | ChatGPT desktop | type `@` and pick the skill |
 
-Example, with `tool-diet`. Prompts that make the agent reach for it without being told:
+Prompts that make the agent reach for each skill without being told, and what comes back:
 
-```text
-Why did this session burn 300K tokens? Find the waste and fix it.
-```
+| Skill | Say something like | What comes back |
+| --- | --- | --- |
+| tool-diet | "Why did this session burn 300K tokens? Find the waste and fix it." / "That MCP server keeps returning huge payloads. Put it on a diet." | A table: the call, the kind of fat, the cut, tokens before → after, and the share of the session's tool tokens recovered. Durable cuts land in the repo. |
+| deeper | "/deeper find out why checkout conversion dropped last month" / "Give me the expert version of this task, not a longer one." | The expert gap, raw inputs, instruments and outside proof; a rewritten prompt; depth markers before → after; then the run, reported against the outside check first. `--full` adds the outcome and other fields, `--run` skips the stop. |
+| acceptance-probes | "Implement ticket 14 and prove the acceptance criteria." / "Were the criteria on this ticket really met?" | `probes.sh`, one function per criterion, red at the start commit; after the work, `start: K of K FAIL, end: K of K PASS`, with criteria that were already true flagged and `HUMAN` ones left unticked. |
+| reconcile | "We're done for today, close out the session." / "Wrap up: what's left on this branch?" | The raw `## git` and `## tracker` blocks, a table of discrepancies between git, tracker and the transcript's claims, nothing acted on until you confirm, and a last line `next: <work> (<skill>)`. |
+| decision-ledger | "Write the spec from our interview." / "Publish the tickets; make sure nothing we decided got lost." | `.scratch/<effort>/ledger.md` with one line per settled decision and its source, and `honoured H of L live, missing M` with a file and line per hit before anything is published. |
 
-```text
-That MCP server keeps returning huge payloads. Put it on a diet.
-```
-
-```text
-Run the tool diet on the last session log and show me before and after.
-```
-
-What comes back is a short table: the call, the kind of fat, the cut, tokens before → after, and one line with the share of the session's tool tokens recovered. Durable cuts land in the repo (a flag, a wrapper script, an MCP tool description), so the next session is lean without being told.
+Every skill ends in a number or an artifact a second pair of eyes can check, never in the agent's own assessment of its work.
 
 ## Layout
 
