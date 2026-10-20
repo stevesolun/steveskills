@@ -1,0 +1,3 @@
+interface:
+  display_name: "Clean Log"
+  short_description: "Clean a data file by script; the change log is computed from the files"

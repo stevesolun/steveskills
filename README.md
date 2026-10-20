@@ -23,6 +23,11 @@ The directory grows one folder at a time. The table below is the index.
 | [red-at-base](./red-at-base) | Reruns every new or changed test at the base commit in a throwaway worktree and counts how many fail there, so a test that passes without the change is found and then changed or deleted rather than kept. |
 | [whose-red](./whose-red) | When a test fails, says whose red it is from runs rather than words: mine, pre-existing, flaky or environment, one table row per test with a base run and repeat counts behind it, before anything is deselected or called unrelated. |
 | [structure-map](./structure-map) | Writes or refreshes a repository structure map: the facts a fresh agent cannot recover from the file tree in under a minute, each paired with the command that proves it, checked by one script that reports confirmed and stale. |
+| [with-receipts](./with-receipts) | Delivers a number from data with its receipt: the question as resolved, the source and its freshness from the data, the query as it ran, a second route to the same number with the delta, and a reviewer who did not write the query. |
+| [driver-split](./driver-split) | Answers why a number moved with named parts that add up to the change: per segment, mix effect and rate effect, ranked by size, residual sized. |
+| [answer-key](./answer-key) | Keeps a file of data questions with known answers, runs it on every change to the data model, definitions or analysis skill, logs each run with its git SHA, and gates on the pass rate. |
+| [clean-log](./clean-log) | Cleans a data file by script and ships it with a change log computed from the two files: rows, columns, and per-column cell changes by kind, with checksums. |
+| [ab-readout](./ab-readout) | Writes up an A/B test from its counts in the only safe order: sample ratio mismatch, rates with intervals, lift with its interval and p-value, detectable effect, then one verdict line. |
 
 More folders will land here. Each one carries its own README with details and sample output.
 
@@ -91,6 +96,11 @@ Prompts that make the agent reach for each skill without being told, and what co
 | red-at-base | "Add tests for this change and tell me which ones would fail without it." / "Would these tests have caught the old behaviour?" | `N of M new or changed tests fail at base (<sha>): R red, E error, G green` with the ID list from a rerun in a throwaway worktree; a green test is changed or deleted, never explained. |
 | whose-red | "The suite is red, is that me?" / "Can I skip this failing test, it looks unrelated." | One row per failing test: `mine`, `pre-existing`, `flaky` or `environment`, with the base run and repeat counts behind it, and `failing N: mine a, pre-existing b, flaky c, environment d`. |
 | structure-map | "Write down how this repo is laid out for the next session." / "Refresh the structure map." | `docs/STRUCTURE.md` under 60 lines, each entry `fact | proof: <command> | expect: <output>`, and `confirmed C, stale S` from running every proof before the map is committed. |
+| with-receipts | "How many active customers did we have last month?" / "Put the weekly metrics in a report I can send to the board." | The number with a `receipt:` block: question as resolved, source, freshness (newest date in the data), the query, the cross-check route, the delta, the reviewer; `receipts.py footer` exits 0 only when all seven are there. |
+| driver-split | "Why is gross margin down in EMEA this quarter?" / "How much of the drop is the UK versus everything else?" | A table of parts that add up to the change: per segment, mix effect, rate effect and interaction in points, ranked, the largest driver named, the residual sized. |
+| answer-key | "We changed the revenue definition; is the analytics agent still right?" / "Can we launch the finance domain to stakeholders?" | `P of N pass (rate)` per run, one row per question with expected and actual, a log row with git SHA and label, exit 1 under the gate. |
+| clean-log | "Clean this export and tell me everything you changed." | The cleaning as a script with dropped rows in a side file, and a log computed from the two files: rows by key, columns, cells changed per column by kind with examples, both checksums. |
+| ab-readout | "Write up the checkout test and tell me whether to ship it." | SRM check, rate per arm with interval, lift with interval and p-value, smallest detectable effect and sample needed, then one verdict line that is the only recommendation. |
 
 Every skill ends in a number or an artifact a second pair of eyes can check, never in the agent's own assessment of its work.
 

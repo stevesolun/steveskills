@@ -1,0 +1,3 @@
+interface:
+  display_name: "A/B Readout"
+  short_description: "An A/B test write-up from counts: SRM, rates, lift and interval, power, verdict"
