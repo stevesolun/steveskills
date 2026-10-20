@@ -1,45 +1,53 @@
 # driver-split
 
-An agent skill that answers "why did the number move?" with named parts that add up to the change: per segment, how much came from the segment's weight shifting and how much from the rate inside it moving, ranked by size, with the residual called a residual and sized.
+An agent skill that answers "why did the number move?" with named parts that add up to the change: per segment, how much came from the segment's weight shifting and how much from the rate inside it moving, ranked by size, with the residual called a residual and sized. By Steve Solun. MIT.
 
-Works in Claude Code, Codex, Copilot, Cursor and any other harness that reads the [Agent Skills](https://agentskills.io) format. By Steve Solun. MIT.
+## What it does
 
-## Install
+It turns a why-question about a metric into arithmetic that closes. For a rate (margin, conversion, fix rate) the change between two points is split, per segment, into a mix effect, a rate effect and their interaction; for a total, into each segment's change and share. The parts in the answer add up to the change the asker quoted, and anything unexplained is named as a residual with its size; a cause with no size is a guess the write-up is not allowed to make.
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=driver-split
+## When to reach for it
+
+Type `/driver-split`, or the agent reaches for it on its own when a task fits: being asked why a metric fell or rose, what is driving a move, or how much of a change is one segment versus everything else.
+
+| Situation | Reach for |
+| --- | --- |
+| A number moved between two points and someone wants the reasons, sized | this skill |
+| The number itself needs its provenance before anyone asks why | [with-receipts](../with-receipts) |
+| Two arms were randomly assigned and the question is whether the difference is real | [ab-readout](../ab-readout) |
+
+A number with no before and after has nothing to split.
+
+## Prerequisites
+
+Python 3, and the metric reproducible from the source at both points with the same query. The segments go in a CSV, one row each: `segment,before_num,before_den,after_num,after_den` for a rate, `segment,before,after` for a total, with every row of the source in exactly one segment so the segments sum to the whole (an "other" bucket catches the rest).
+
+## The split
+
+A **split** is a list of named parts that add up to the change, biggest first. The shape is what the business expects of a good answer to "why is it down": 2.4 of the 3.2 points in one segment, two more parts of 0.4 each, the rest named as approximate. What goes wrong in practice is a paragraph that names a cause without a size, or parts that quietly do not sum to the move the asker quoted.
+
+```text
+driver-split.py SEGMENTS.csv [--unit pts|abs]
 ```
 
-```bash
-npx skills@latest update driver-split
-```
+For a rate file it prints, per segment, the weight before and after, the rate before and after, and the mix, rate and interaction effects (`--unit pts` as percentage points, `--unit abs` in the metric's own units), ranked by size; then `parts: ... change: ... add up`, and the largest driver with its share of the move. For a total file it prints each segment's change and share. Segments that pull in opposite directions are reported as offsetting, because a small net move can hide two large drivers. Each deeper level (the largest driver split again on a second dimension) is its own run, kept with its file.
 
-Or, in Claude Code, as a plugin that updates itself:
+## Common questions
 
-```bash
-claude plugin marketplace add stevesolun/steveskills
-claude plugin install steveskills@steveskills
-```
+**Mix or rate: which one is the cause?**
+Both are, in the proportions the table prints, and the two answer different questions. In the sample run the largest part is `platforms` at +9.88 lines per file; its files did get longer (+5.12, the rate effect), but more of its contribution is mix (+6.85): the shortest-file area shrank from 47% to 28% of the codebase, which pulls the average up without any file changing. A paragraph would have said "TypeScript made the files longer" and been half right.
 
-Pick one route per agent; installing both gives you the skill twice.
+**The net change is small but the parts are huge. Which do I report?**
+The parts, with the net stated as what they add up to. In the second sample run the net is -1,757 lines, while one part alone is -2,631 and another is +1,899; the script says `the overall change is only -1757 because other parts offset it`, and the write-up says the same instead of reporting a quiet net.
 
-## The idea
+**My segments do not sum to the whole.**
+Then the split cannot close, and the script will say the parts do not add up. Every row of the source belongs to exactly one segment; an "other" bucket holds whatever the chosen dimension does not name.
 
-The most common data question from the business is a why: why is gross margin down in EMEA this quarter, why did conversion drop, why is churn up. The shape of a good answer is fixed, and Anthropic's own worked example of the ad-hoc data question shows it: 2.4 of the 3.2 points are one segment, two more parts of 0.4 each, and the rest named as approximate. Parts, sizes, a residual, biggest first. What goes wrong in practice is a paragraph that names a cause without a size, or parts that do not add up to the change the asker quoted.
+## It's working if
 
-`driver-split` does the arithmetic. For a rate (margin, conversion, fix rate) the change between two points is split, per segment, into a mix effect (the segment's share of the whole moved), a rate effect (the rate inside the segment moved) and their interaction; the three columns add up to the change exactly. For a total, each segment's change and share. Offsetting drivers are reported as offsetting, because a small net move can hide two large ones.
-
-## How it runs
-
-The agent reaches for it when asked why a metric fell or rose, what is driving a move, or how much of a change is one segment versus everything else. Typing `/driver-split` works too.
-
-1. **Fix the number and the two points.** The metric as defined, and the before and after reproduced from the source with the same query.
-2. **Choose the segmentation** and extract one row per segment; the segments sum to the whole.
-3. **Split the change.** `driver-split.py SEGMENTS.csv` prints the table, checks the parts add up, names the largest driver.
-4. **Go one level down** on the largest driver with a second dimension until what is left is small or has a dated cause.
-5. **Write the answer as the split**, observations first, files saved so it can be rerun.
-
-## Sample output
+- The write-up's parts add up to the change the asker quoted, and the script's `add up` line is quoted beneath them.
+- The largest driver is named with its size and its share of the move, and offsetting parts are called out whenever the net is small.
+- A second-level split exists on the largest driver, or the remaining unexplained part is labelled residual and sized.
 
 Two real splits on [vuejs/vue](https://github.com/vuejs/vue) (212k stars) between the tags `v2.6.14` and `v2.7.16`, the release that rewrote the codebase in TypeScript. First, a ratio: the average length of a source file under `src/`, split by area. Weight is each area's share of files; rate is its lines per file.
 
@@ -85,16 +93,24 @@ largest driver: server (-2631); the overall change is only -1757 because other p
 
 The net change is small and misleading on its own: server rendering and Weex left the tree, the Vue 3 compatibility layer and the type definitions arrived, and the script reports the offsetting parts instead of the net.
 
-## Why a script
+## Where it fits
 
-Mix and rate effects are easy to describe and easy to get wrong by hand, and a split that does not add up is two guesses dressed as one answer. `driver-split.py` computes the identity, checks it, and ranks the parts, so the write-up can only contain parts that sum to the change the asker quoted.
+A reach-for-it-anytime standalone for the data role, usually the second question after a number has landed. Its neighbours are [with-receipts](../with-receipts), because the before and after values are themselves numbers that need a source and a query before they are split, and [ab-readout](../ab-readout), because a move between two randomly assigned arms is a different question with its own intervals. The index of every skill is the [root README](../README.md#skills).
+
+## Install
+
+```bash
+npx skills@latest add stevesolun/steveskills --skill=driver-split
+```
+
+Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
 
 ## Files
 
 ```text
 driver-split/
 ├── SKILL.md                     # the skill
-├── agents/openai.yaml           # Codex picker metadata
+├── agents/openai.yaml           # Codex and ChatGPT picker metadata
 └── scripts/driver-split.py      # rate (mix, rate, interaction) and total splits; --help for options
 ```
 

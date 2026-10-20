@@ -33,7 +33,7 @@ Compare every pair. A discrepancy is any of:
 
 Write each as one row: `<source A> says | <source B> says | proposed action`.
 
-**Done when** every pair of sources has been compared and the table is complete, or reads `0 discrepancies`.
+**Done when** each of the three pairs (git and tracker, git and transcript, tracker and transcript) has been compared and every disagreement found is a row, or the table reads `0 discrepancies`.
 
 ## 4. Confirm, then act
 

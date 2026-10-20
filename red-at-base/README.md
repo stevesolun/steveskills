@@ -1,44 +1,53 @@
 # red-at-base
 
-An agent skill that reruns every new or changed test at the base commit, in a throwaway worktree, and counts how many fail there. A test that passes without the change is reported as a finding and then changed or deleted, never kept with an explanation.
+An agent skill that reruns every new or changed test at the base commit, in a throwaway worktree, and counts how many fail there. A test that passes without the change is reported as a finding and then changed or deleted, never kept with an explanation. By Steve Solun. MIT.
 
-Works in Claude Code, Codex, Copilot, Cursor and any other harness that reads the [Agent Skills](https://agentskills.io) format. By Steve Solun. MIT.
+## What it does
 
-## Install
+It takes every test a diff added or edited, runs it against the code as it was at the base commit, and reports the count: red, error, green. A test that is green at base tested nothing about the change, and the only two moves the skill allows on it are an edit that turns it red and a deletion; a paragraph explaining why it was kept is not one of them.
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=red-at-base
+## When to reach for it
+
+Type `/red-at-base`, or the agent reaches for it on its own when a task fits: tests have been written for a change and are about to be called its coverage, a diff under review adds or edits tests, or you ask whether the tests would have caught the old behaviour.
+
+| Situation | Reach for |
+| --- | --- |
+| The tests a change added must be shown to fail without it | this skill |
+| A test is failing and the question is whose fault it is | [whose-red](../whose-red) |
+| A ticket's acceptance criteria need proving, not the tests | [acceptance-probes](../acceptance-probes) |
+
+Tests the change left alone are out of scope; the count is over new or changed tests only.
+
+## Prerequisites
+
+A git repository with a base commit to pin and a test runner the script can drive (pytest); for another runner, the same steps are done by hand and the same headline written.
+
+## Red at base
+
+A test counts as evidence about a change only when it is **red at base**: run against the code before the change, it fails. Green now says only that the code and the tests agree now; a test written after the code, with its expected value read off the code, passes before the change exists too, and the session that wrote it is the only witness that red ever happened.
+
+```text
+red-at-base.py <sha> [path ...]
 ```
 
-```bash
-npx skills@latest update red-at-base
-```
+The script collects test ids at the working tree and at the base with parametrised suffixes stripped, names M as the new ids plus the ids a diff hunk lands in, adds a worktree at the base, copies the current test files over it, pins the import path to that worktree and prints where the project module resolves, runs exactly M there, removes the worktree, and prints `N of M new or changed tests fail at base (<sha>): R red, E error, G green` with the ids. Exit 0 only when G is 0.
 
-Or, in Claude Code, as a plugin that updates itself:
+## Common questions
 
-```bash
-claude plugin marketplace add stevesolun/steveskills
-claude plugin install steveskills@steveskills
-```
+**My green test is a boundary guard, on purpose. Can I keep it?**
+Not as part of the change's tests. The first version of this skill, run as an A/B, produced the right headline and then kept two green-at-base tests as "boundary guards, on purpose"; that is the failure this version closes. A characterisation test added on purpose is committed first, on its own, and that commit is passed as the base, so M holds only the change's own tests.
 
-Pick one route per agent; installing both gives you the skill twice.
+**Why does it print where the module resolves?**
+Because an editable install imports the current tree even from inside the base worktree, and grades the wrong code. The printed path has to lie inside the worktree; the sample run below shows the line.
 
-## The idea
+**What is the difference between error and red?**
+Red: the test ran at base and its assertion failed, which is the proof. Error: the test could not run at base, usually because it imports a symbol the change introduces. That is red for the weakest reason: the test needs the change to exist, which says nothing about what the change does.
 
-An agent implements a change, writes tests, and reports a green suite. Green says the code and the tests agree now. It says nothing about whether the tests can tell the new behaviour from the old: a test written after the code, with its expected value read off the code, passes before the change exists too. The session that wrote it is the only witness that red ever happened, and in an audit of 249 agent coding sessions "tests pass" was claimed seven times with no test run in the session at all.
+## It's working if
 
-The check is mechanical. Take every test the diff added or edited, run it against the code as it was at the base commit, and count. A test that goes red there bites. A test that errors there needs the change to exist, which is red for the weakest reason. A test that stays green there tested nothing about the change, and the next thing that happens to it is an edit or a deletion.
-
-## How it runs
-
-The agent reaches for it when tests have been written for a change and are about to be called its coverage, when a diff under review adds or edits tests, or when you ask whether the tests would have caught the old behaviour. Typing `/red-at-base` works too.
-
-1. **Pin the base.** The commit the change grew from, as a sha.
-2. **Run the rerun.** `scripts/red-at-base.py <sha>` (Python, standard library and git) collects test ids at the working tree and at the base with parametrised suffixes stripped, names M as the new ids plus the ids a diff hunk lands in, adds a worktree at the base, copies the current test files over it, pins the import path to that worktree and prints where the project module resolves, runs exactly M there, removes the worktree, and prints `N of M new or changed tests fail at base (<sha>): R red, E error, G green` with the ids.
-3. **Change or delete every green.** Sharpen the test until it goes red at base, or delete it. Rerun after every edit.
-4. **Report.** The final headline, the ids, and one line per green saying whether it was sharpened or deleted.
-
-## Sample output
+- The trace holds a headline in the shape `N of M new or changed tests fail at base (<sha>): R red, E error, G green`, with the ids under it.
+- Above it, a `module <name> resolves to <path>` line whose path lies under the throwaway worktree, and `worktrees: N before, N after` with the same number twice.
+- The final run reads `0 green`, and the report says `sharpened` or `deleted` for every earlier green.
 
 A real run on [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7`, in a scratch worktree where `ctx fit --max-depth` was given a floor of 1 and three tests were added to `src/tests/fit/test_cli_surface.py`. One of them asserted that `--max-depth 1` is accepted, which was already true.
 
@@ -89,16 +98,24 @@ This version was then run as its own A/B: the same task (give `ctx fit --max-dep
 
 One repetition, one repository; the full A/B material is reproducible from the pinned commit.
 
-## Why a script
+## Where it fits
 
-"These tests would fail without my change" is a claim about a run that did not happen. `red-at-base.py` makes the run, in a worktree the agent cannot have been editing, with the import path pinned and the resolved module path printed so a reviewer can see which code was graded. The headline is a count, the ids are listed, and the exit code is 0 only when nothing is green at base, so a hook can hold the line without reading the transcript.
+A chain step after the tests are written and before the change is called covered or sent to review. Its neighbours are [whose-red](../whose-red), because the other question about a red test is whose it is, and that one is answered by runs too, and [acceptance-probes](../acceptance-probes), because probes grade the ticket while this skill grades the tests, and the two compose. The index of every skill is the [root README](../README.md#skills).
+
+## Install
+
+```bash
+npx skills@latest add stevesolun/steveskills --skill=red-at-base
+```
+
+Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
 
 ## Files
 
 ```text
 red-at-base/
 ├── SKILL.md                    # the skill
-├── agents/openai.yaml          # Codex picker metadata
+├── agents/openai.yaml          # Codex and ChatGPT picker metadata
 └── scripts/red-at-base.py      # reruns new or changed tests at the base; --help for options
 ```
 

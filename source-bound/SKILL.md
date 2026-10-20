@@ -12,7 +12,7 @@ A memo written from a pile of sources is worth exactly as much as the reader's a
 
 ## 1. Inventory the pile
 
-Run `scripts/source-bound.py inventory SOURCES_DIR`. One row per file: id, kind, pages, characters of text extracted, READABLE or UNREADABLE. An unreadable file (a scanned PDF, an empty export) is reported to the user now, before anything is written about it; nothing is summarised from a file whose text could not be extracted.
+Run `scripts/source-bound.py inventory SOURCES_DIR`. One row per file: id, kind, pages, characters of text extracted, READABLE or UNREADABLE. An unreadable file (a scanned PDF, an empty export) is reported to the user now, before anything is written, and stays in the memo only as an entry in the accounting; the readable files are the ones summarised.
 
 **Done when** the inventory is in the notes and the user has the list of unreadable files.
 
@@ -32,7 +32,7 @@ Every claim carries a citation in the form `[id]` or `[id#section]` (`[pastebin#
 
 Run `scripts/source-bound.py check MEMO.md --sources SOURCES_DIR --sentences`. It resolves every citation to a provided source, lists UNRESOLVED citations (a reference from memory, or to a file that was not given), lists provided sources never cited, and lists the sentences that rest on exactly one source. An unresolved citation is removed or replaced with a provided source; a never-cited readable source is either worked in or listed at the end with the reason it was not used.
 
-**Done when** the check exits 0 and every single-source sentence is marked as such in the memo.
+**Done when** the check's exit code is 0 and every single-source sentence is marked as such in the memo.
 
 ## 5. Close with the accounting
 

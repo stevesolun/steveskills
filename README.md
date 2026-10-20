@@ -11,7 +11,22 @@ Every skill here follows the same rules:
 
 The directory grows one folder at a time. The table below is the index.
 
+## Why these skills exist
+
+Each skill started from a failure seen in a real session, and each one ends in a number a second pair of eyes can check. The failures fall into four kinds:
+
+| The failure | The skills |
+| --- | --- |
+| **The agent grades its own work.** "Tests pass", "done", "the criteria are met": claims with no run behind them. | [acceptance-probes](./acceptance-probes), [red-at-base](./red-at-base), [whose-red](./whose-red), [reconcile](./reconcile) |
+| **A number arrives without its receipt.** A figure nobody can rerun, a move explained by a guess, an analytics agent that drifted since it was last checked. | [with-receipts](./with-receipts), [driver-split](./driver-split), [answer-key](./answer-key), [clean-log](./clean-log), [ab-readout](./ab-readout) |
+| **The write-up drifts from its sources.** A summary with a remembered figure, a memo citing a file nobody gave, a claim that outruns its evidence, a proposal thin on the criterion that scores. | [number-trace](./number-trace), [source-bound](./source-bound), [cite-or-cut](./cite-or-cut), [criteria-map](./criteria-map) |
+| **The session pays for what it does not use.** Fat tool results, a repository re-learned every morning, decisions lost between phases, a task done bigger instead of deeper. | [tool-diet](./tool-diet), [structure-map](./structure-map), [decision-ledger](./decision-ledger), [deeper](./deeper) |
+
 ## Skills
+
+Every skill is model-invoked: the agent reaches for it when a task matches its description, and you can call any one by name. Each folder's README is its docs page: what it does, when to reach for it, the questions that came up while building it, what you see when it is working, and where it sits among the others.
+
+### Engineering
 
 | Skill | What it does |
 | --- | --- |
@@ -23,17 +38,27 @@ The directory grows one folder at a time. The table below is the index.
 | [red-at-base](./red-at-base) | Reruns every new or changed test at the base commit in a throwaway worktree and counts how many fail there, so a test that passes without the change is found and then changed or deleted rather than kept. |
 | [whose-red](./whose-red) | When a test fails, says whose red it is from runs rather than words: mine, pre-existing, flaky or environment, one table row per test with a base run and repeat counts behind it, before anything is deselected or called unrelated. |
 | [structure-map](./structure-map) | Writes or refreshes a repository structure map: the facts a fresh agent cannot recover from the file tree in under a minute, each paired with the command that proves it, checked by one script that reports confirmed and stale. |
+
+### Data
+
+| Skill | What it does |
+| --- | --- |
 | [with-receipts](./with-receipts) | Delivers a number from data with its receipt: the question as resolved, the source and its freshness from the data, the query as it ran, a second route to the same number with the delta, and a reviewer who did not write the query. |
 | [driver-split](./driver-split) | Answers why a number moved with named parts that add up to the change: per segment, mix effect and rate effect, ranked by size, residual sized. |
 | [answer-key](./answer-key) | Keeps a file of data questions with known answers, runs it on every change to the data model, definitions or analysis skill, logs each run with its git SHA, and gates on the pass rate. |
 | [clean-log](./clean-log) | Cleans a data file by script and ships it with a change log computed from the two files: rows, columns, and per-column cell changes by kind, with checksums. |
 | [ab-readout](./ab-readout) | Writes up an A/B test from its counts in the only safe order: sample ratio mismatch, rates with intervals, lift with its interval and p-value, detectable effect, then one verdict line. |
+
+### Research
+
+| Skill | What it does |
+| --- | --- |
 | [number-trace](./number-trace) | Summarises a paper, report or analysis so that every number in the summary traces to the source text or a computed output, and every number that does not is labelled assumed, remembered or missing. |
 | [source-bound](./source-bound) | Builds a memo or literature map from the sources given and nothing else: inventories what could be read, resolves every citation against it, marks single-source points, and lists the unreadable and the unused. |
 | [cite-or-cut](./cite-or-cut) | Revises a draft in the author's voice with a scan that lists, by line, every sentence that asserts without support or overstates the evidence, and edits them as original-then-revised pairs. |
 | [criteria-map](./criteria-map) | Drafts a proposal against the criteria it will be judged on and maps it: words per criterion, the thin and the unmapped, and every placeholder still open. |
 
-More folders will land here. Each one carries its own README with details and sample output.
+More folders will land here, one at a time. The [CHANGELOG](./CHANGELOG.md) records each release.
 
 ## Install
 
@@ -116,11 +141,13 @@ Every skill ends in a number or an artifact a second pair of eyes can check, nev
 
 ```text
 .claude-plugin/        # Claude Code plugin and marketplace manifests
+CHANGELOG.md           # one entry per release
 <skill>/
-├── README.md          # what it does, when it fires, sample output
+├── README.md          # the docs page: what it does, when to reach for it, common questions, it's working if
 ├── SKILL.md           # the skill itself (frontmatter + instructions)
+├── <REFERENCE>.md     # reference a branch of the skill loads on demand, where a skill has one (deeper/FULL.md)
 ├── agents/openai.yaml # Codex and ChatGPT picker metadata
-└── scripts/           # anything the skill runs
+└── scripts/           # the one script that prints the number behind the claim
 ```
 
 ## License

@@ -1,45 +1,49 @@
 # cite-or-cut
 
-An agent skill for revising a draft section in the author's voice: the one structural issue, the argument flow, line-level edits as original then revised, and a scan that lists every sentence asserting something without support or asserting more than the evidence carries.
+An agent skill for revising a draft section in the author's voice: the one structural issue, the argument flow, line-level edits as original then revised, and a scan that lists every sentence asserting something without support or asserting more than the evidence carries. By Steve Solun. MIT.
 
-Works in Claude Code, Codex, Copilot, Cursor and any other harness that reads the [Agent Skills](https://agentskills.io) format. By Steve Solun. MIT.
+## What it does
 
-## Install
+It makes the reviewer's list exhaustive. An editor flags unsupported sentences by instinct and an agent does it unevenly: it lists the first three it notices and misses the eleventh. Here the list comes from a scan of every sentence, with line numbers and counts, and the author decides each line; nothing is added to the draft that the author did not supply, no result and no reference.
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=cite-or-cut
+## When to reach for it
+
+Type `/cite-or-cut`, or the agent reaches for it on its own when a task fits: revising, tightening or reviewing a draft section of a paper, thesis, proposal or report before a reviewer sees it.
+
+| Situation | Reach for |
+| --- | --- |
+| The draft's claims need support or softening, number or not | this skill |
+| The summary's numbers must come from the source | [number-trace](../number-trace) |
+| The memo's citations must resolve to the files the reader gave | [source-bound](../source-bound) |
+
+Writing new content, or adding results and citations the author did not supply, is outside it.
+
+## Cite or cut
+
+The rule is **cite or cut**: a sentence that asserts a result, a cause, a comparison, a quantity or a generalisation carries its support in the same sentence, or it is softened to what the author can show, or it goes. A sentence is supported when it carries a citation, a footnote, or a table or figure reference; overstatement is a word list (proves, clearly, always, all, well established, significant with no number beside it). The scan prints both lists; the author resolves each line with a `[CITE]` placeholder, a softening, a cut, or a recorded reason to keep it.
+
+```text
+cite-or-cut.py DRAFT.md [--show N]
 ```
 
-```bash
-npx skills@latest update cite-or-cut
-```
+It prints the claims without support and the overstatements, each with its line number, then `claims: C, unsupported U, overstated O`. Exit 1 while U or O is above zero. The counts before and after the revision are the measure of the pass.
 
-Or, in Claude Code, as a plugin that updates itself:
+## Common questions
 
-```bash
-claude plugin marketplace add stevesolun/steveskills
-claude plugin install steveskills@steveskills
-```
+**The scan flagged a definition. Is that wrong?**
+The lists are form, not judgement, and the script's own help says so. A definition ("Atomicity: each transaction is all or nothing") belongs on the list because it asserts without support, and it stays in the draft with the reason recorded next to it. The count after the pass is the number of lines the author chose to leave, which is a different number from the count of lines the agent happened to notice.
 
-Pick one route per agent; installing both gives you the skill twice.
+**Does it add citations?**
+It adds `[CITE]` where a citation is owed and leaves the reference for the author. A revision that supplies a plausible reference the author never read is the one edit a reviewer cannot forgive, so the skill's first rule is that every result and every reference in the revised file was already in the draft.
 
-## The idea
+**Why edits as pairs rather than a rewritten section?**
+Because the voice is the author's. Original-then-revised lets the author accept or reject each change and keeps their terminology; a section rewritten in one go reads like the agent and loses the claims the author meant to keep.
 
-The research-role version of "revise my draft" is specific: keep my terminology and claims, do not add results or citations, give edits as original-then-revised rather than rewriting in your voice, and list the sentences that need a citation or overstate the evidence. The last item is the one an editor does by instinct and an agent does unevenly: it lists the first three it notices and misses the eleventh.
+## It's working if
 
-`cite-or-cut` makes the list exhaustive by making it mechanical. A sentence bears a claim when it states a result, a cause, a comparison, a quantity or a generalisation; it is supported when the same sentence carries a citation, a footnote, or a table or figure reference. Overstatement is a word list: proves, clearly, always, all, well established, significant with no number beside it. The scan prints both lists with line numbers and counts; the author decides each line, and the counts before and after the revision are the measure of the pass.
-
-## How it runs
-
-The agent reaches for it when asked to revise, tighten or review a draft section of a paper, thesis, proposal or report before a reviewer sees it. Typing `/cite-or-cut` works too.
-
-1. **Fix the venue, the audience and the voice.** Nothing is added that the author did not supply.
-2. **Name the one structural issue** and propose the flow as a numbered list.
-3. **Scan.** `cite-or-cut.py DRAFT.md`.
-4. **Give line-level edits as pairs**: `[CITE]`, soften, or cut; a kept sentence gets its reason.
-5. **Close with the reviewer's questions**, and the counts before and after.
-
-## Sample output
+- Every sentence the scan listed has an edit pair or a recorded reason, and the revised file carries no result or reference the draft did not.
+- Overstatement words are gone or qualified, and `[CITE]` marks what the author still owes.
+- The before and after counts are in the notes, so the author can show a reviewer how many lines they chose to leave.
 
 A real run on the database section (2,360 words) of [donnemartin/system-design-primer](https://github.com/donnemartin/system-design-primer) (about 290k stars), a text written for engineers rather than reviewers, which is exactly why it reads as one long list of unsupported assertions to this scan.
 
@@ -61,16 +65,37 @@ claims: 40, unsupported 39, overstated 2  (sentences read: 143)
 
 Exit code 1. Line 15 is a definition and stays, with the reason recorded; line 50 is the kind of sentence a reviewer circles, and it gets a `[CITE]` or a softening. The scan does not know the difference, and says so in its own help text; the author does, and the counts after the pass show how many lines they chose to leave.
 
-## Why a script
+### A/B against a baseline skill set
 
-An editor's list of unsupported sentences is as long as the editor's attention. `cite-or-cut.py` reads every sentence and applies the same two tests to each, so the author sees the whole list once, decides each line, and can show a reviewer the count that went from 39 to whatever they chose to leave.
+Four blind repetitions, each a fresh headless session: arm A had a baseline skill set, arm B the same set plus this skill. The task was a 460-word thesis Background section with nine planted defects (six unsupported assertions, three overstatements) and five real references; two repetitions said "make every claim one I can defend", two asked plainly for a revision. Pre-registered counts: D, planted defects still present in a sentence with no citation; I, citation markers or references not in the draft. Win: D <= 1 and I = 0 with the skill, D >= 3 or I >= 1 without.
+
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep1 | instruction in prompt | D=0, I=0 | D=0, I=0 | none | A 3/4, B 3/4 |
+| rep2 | instruction in prompt | D=0, I=0 | D=0, I=0 | none | A 2/4, B 4/4 |
+| rep3 | plain ask | D=0, I=0 | D=1, I=0 | none | A 2/4, B 3/4 |
+| rep4 | plain ask | D=0, I=0 | D=2, I=0 | none | A 3/4, B 3/4 |
+
+The baseline fixed all nine defects in every repetition. The skill arm left one and then two on the plain ask: a claim softened and marked `[CITE]` for the author to fill, which is the skill's own option for a claim only the author can source and which the screener counts as unsupported until it is filled, and one claim kept. No measured advantage on the counts. The blind grader, scoring the bullets above, preferred the skill arm in two repetitions (its original-then-revised pairs and its before and after counts) and tied in two.
+
+## Where it fits
+
+A reach-for-it-anytime standalone for the research role. Its neighbours are [source-bound](../source-bound), because a citation can resolve to a file the reader gave and still claim more than the file supports, and [number-trace](../number-trace), because a claim with a figure in it needs the figure traced as well as the sentence supported. The index of every skill is the [root README](../README.md#skills).
+
+## Install
+
+```bash
+npx skills@latest add stevesolun/steveskills --skill=cite-or-cut
+```
+
+Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
 
 ## Files
 
 ```text
 cite-or-cut/
 ├── SKILL.md                    # the skill
-├── agents/openai.yaml          # Codex picker metadata
+├── agents/openai.yaml          # Codex and ChatGPT picker metadata
 └── scripts/cite-or-cut.py      # unsupported claims and overstatements by line; --help for options
 ```
 

@@ -14,7 +14,7 @@ An analytics setup is accurate on the day it is checked and drifts from then on:
 
 One row per question: `id, question, query, expected, tolerance`. The question in the stakeholder's words, the query that answers it against the governed source, the expected value as it was verified by a person, and a tolerance where the value is a rate or an estimate. Anchor each row to a stable snapshot (a frozen table, a date window that is complete and closed) so the expected value does not move with the data. Start with the questions the blessed dashboards already answer, then the ones stakeholders actually ask, then every correction a stakeholder has ever sent.
 
-**Done when** the key has at least a few dozen rows per domain, each verified by a person against the dashboard or the source, and none depends on today's date.
+**Done when** the key has at least a few dozen rows per domain, each verified by a person against the dashboard or the source and each anchored to a closed window.
 
 ## 2. Run it
 

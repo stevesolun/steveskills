@@ -1,44 +1,53 @@
 # decision-ledger
 
-An agent skill that keeps an append-only ledger of settled decisions with their source, and audits each phase artifact (spec, tickets, PR) against it before publishing, so every live decision is honoured or superseded and the implementer never re-asks a settled question.
+An agent skill that keeps an append-only ledger of settled decisions with their source, and audits each phase artifact (spec, tickets, PR) against it before publishing, so every live decision is honoured or superseded and the implementer never re-asks a settled question. By Steve Solun. MIT.
 
-Works in Claude Code, Codex, Copilot, Cursor and any other harness that reads the [Agent Skills](https://agentskills.io) format. By Steve Solun. MIT.
+## What it does
 
-## Install
+It keeps every settled decision in one append-only file per effort, with where it came from, and looks each live one up in the spec, the ticket set or the PR before that artifact goes out. Publication waits for `missing 0`: a decision the artifact does not carry is added to it or superseded with the user's reason, and a changed mind is a new entry rather than an edit.
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=decision-ledger
+## When to reach for it
+
+Type `/decision-ledger`, or the agent reaches for it on its own when a task fits: an interview round is answered, a choice is settled in conversation, or a spec, ticket set, branch or PR is about to be published from a conversation that holds decisions.
+
+| Situation | Reach for |
+| --- | --- |
+| Decisions settled in conversation must survive into the next phase's artifact | this skill |
+| A session is ending and git, the tracker and the chat may disagree | [reconcile](../reconcile) |
+| A ticket's acceptance criteria need proving before and after the work | [acceptance-probes](../acceptance-probes) |
+
+A choice nobody settled is a question, not an entry; the ledger records answers.
+
+## Prerequisites
+
+A workspace to write into: the ledger lives at `.scratch/<effort-slug>/ledger.md` and is created on first use. The artifacts audited are files; a tracker issue is fetched to a file first.
+
+## The ledger
+
+The **ledger** is one line per decision, `D<n> | <source> | <decision, in the user's words> | supersedes D<m>`, numbered without restarting across rounds and sessions, so a later round's Q1 maps to a fresh D-number. The **audit** looks every live entry up in the artifact by an explicit reference (`(D7)` in the text) or a literal run of its words, and prints the file and line of each hit:
+
+```text
+ledger-audit.py .scratch/<effort-slug>/ledger.md <artifact> [<artifact> ...]
 ```
 
-```bash
-npx skills@latest update decision-ledger
-```
+Three verdicts per entry: honoured (with a line number), superseded (a later entry names it), missing. The report ends `honoured <H> of <L> live; superseded <S>; missing <M>`, and the exit code is 1 while anything is missing, so a publish hook can refuse the artifact.
 
-Or, in Claude Code, as a plugin that updates itself:
+## Common questions
 
-```bash
-claude plugin marketplace add stevesolun/steveskills
-claude plugin install steveskills@steveskills
-```
+**The audit says MISSING, but the spec does say it.**
+In other words. The script counts an explicit reference or a literal run of the decision's words; a paraphrase ("bare `ctx` follows the same rule") is invisible to it, and in the sample below that is exactly the one line out of sixteen it flagged. Tag the line with its D-number and it is found on every future audit.
 
-Pick one route per agent; installing both gives you the skill twice.
+**The user changed their mind. Do I edit the entry?**
+No. Append a new entry that supersedes the old one, with the source of the change. The old line stays, marked superseded on the next audit, so the history of the decision is readable.
 
-## The idea
+**Why not restart the numbering each round?**
+Because a later round's Q1 then collides with an earlier Q1, which is one of the observed leaks this skill was written against: an agent recording a recommendation the user had rejected under a number that already meant something else.
 
-You answer twenty questions in an interview round, and the spec forgets five of them. The tickets widen two more. The implementer, in a fresh session, asks you the same questions again. The same leaks show up in every interview-to-implementation workflow: decisions from the interview missing from the spec, test seams agreed in the spec dropped by the ticket template so the implementer never writes a test first, decisions widening between interview and tickets and only caught at code review, an agent re-asking settled questions and recording recommendations the user had rejected, and question numbers restarting at Q1 in a later round, colliding with answers already given.
+## It's working if
 
-The ledger is one append-only file per effort: one line per settled decision, with where it came from (`round 3 Q1, user overruled: <the rejected recommendation>`), numbered without restarting across rounds or sessions. A changed mind is a new line that supersedes an old one, never an edit. Before a spec, ticket set or PR goes out, every live entry is looked up in the artifact and the report is a count: `honoured 15 of 16 live, missing 1`. Publication waits for `missing 0`.
-
-## How it runs
-
-The agent reaches for it when an interview round is answered, when a choice is settled in conversation, or when a spec, ticket set, branch or PR is about to be published from a conversation that holds decisions. Typing `/decision-ledger` works too.
-
-1. **Append.** One entry per decision, in the user's words, with its source.
-2. **Audit at the phase end.** `scripts/ledger-audit.py ledger.md <artifact>...` finds each live entry by an explicit reference (`(D7)` in the text) or a literal run of its words, and prints the file and line.
-3. **Report and resolve.** A missing entry is the finding: add it to the artifact, or supersede it with the user's reason. Rerun until `missing 0`.
-4. **Hand the ledger forward.** Every handoff, spec, ticket and implementer prompt names the ledger path.
-
-## Sample output
+- Every answered interview round adds entries, each with a source and the user's words.
+- Before a spec or ticket set goes out, an audit report shows `honoured H of L live` with a file and line per hit, and `missing 0`.
+- The implementer's prompt names the ledger path, and the implementer asks no question the ledger already answers.
 
 From the A/B that ranked this skill: an interview about adding `--format table|json|markdown` to `ctx fit`, answered from a fixed sheet of 12 decisions (three of them overruling the agent's own recommendation), then written up as a spec and tickets, twice in fresh sessions on [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7`, once with a baseline skill set and once with the same set plus this skill.
 
@@ -71,16 +80,24 @@ The missing line is a paraphrase ("bare `ctx` follows the same rule"), which the
 
 One repetition, one repository; the full A/B material is reproducible from the pinned commits.
 
-## Why a script
+## Where it fits
 
-"The spec reflects everything we agreed" is the agent's opinion of its own spec. `ledger-audit.py` turns it into a lookup with a line number per hit and an exit code, so a pre-publish hook can refuse a spec that lost a decision, and a reviewer can see which line honours which one without reading the interview.
+A chain step across phases: interview, spec, tickets, implementation, PR, with an audit at each boundary. Its neighbours are [reconcile](../reconcile), because a decision the transcript holds and no durable record carries is one of the discrepancies it lists at close, and [acceptance-probes](../acceptance-probes), because a ticket's criteria are often ledger entries made runnable. The index of every skill is the [root README](../README.md#skills).
+
+## Install
+
+```bash
+npx skills@latest add stevesolun/steveskills --skill=decision-ledger
+```
+
+Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
 
 ## Files
 
 ```text
 decision-ledger/
 ├── SKILL.md                     # the skill
-├── agents/openai.yaml           # Codex picker metadata
+├── agents/openai.yaml           # Codex and ChatGPT picker metadata
 └── scripts/ledger-audit.py      # audits an artifact against the ledger; --help for options
 ```
 

@@ -32,7 +32,7 @@ Run `scripts/number-trace.py --doc SUMMARY.md SOURCE [SOURCE ...]`. It takes eac
 
 Each unfound number is one of: a derived figure (show the computation from quoted inputs and mark it `(computed from ...)`), a number from memory or outside the set (mark it `(assumed)` or remove it), a transcription error (fix it), or a figure the source carries only in an image (say "the paper reports it in Figure 3; the text does not carry the value"). A number whose part of the source could not be found is reported as such rather than estimated. A found number is checked once by eye against the source line the trace printed: the same figure can appear in a source with another meaning.
 
-**Done when** the trace exits 0: every number is found or labelled, and the found rows read right against their source lines.
+**Done when** the trace's exit code is 0 (every number found or labelled) and the found rows read right against their source lines.
 
 ## 5. Close with what the source does not say
 

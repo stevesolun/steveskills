@@ -24,9 +24,9 @@ Write the outline so that each criterion has a section whose heading uses the cr
 
 ## 3. Draft with placeholders, in the field's register
 
-Draft the specific aims and significance first, then the rest. Figures the author has not supplied are placeholders in square brackets, `[PRELIMINARY DATA]`, `[BUDGET]`, `[CITATION]`, with a note of what should go there; nothing in a placeholder's place is invented. The register is the field's, as in the author's own prior documents.
+Draft the specific aims and significance first, then the rest. Figures the author has not supplied are placeholders in square brackets, `[PRELIMINARY DATA]`, `[BUDGET]`, `[CITATION]`, with a note of what should go there; a placeholder stays a placeholder until the author supplies the figure. The register is the field's, as in the author's own prior documents.
 
-**Done when** every section has text or an explicit placeholder, and no number, result or reference exists in the draft that the author did not supply.
+**Done when** every section has text or an explicit placeholder, and every number, result and reference in the draft came from the author's material.
 
 ## 4. Map the draft
 
@@ -38,4 +38,4 @@ Run `scripts/criteria-map.py CRITERIA.txt DRAFT.md --placeholders`. Per criterio
 
 For each criterion the map shows as NONE, THIN or small in share relative to its weight in the review, say what would strengthen it (a specific aim that speaks to it, a paragraph the author can write from their data, a collaborator) and draft it where the material exists. Placeholders are closed by the author's figures, or the draft ships with the list of what is still open.
 
-**Done when** the map exits 0, or the author has the list of open placeholders and weak criteria with a suggestion for each.
+**Done when** the map's exit code is 0, or the author has the list of open placeholders and weak criteria with a suggestion for each.

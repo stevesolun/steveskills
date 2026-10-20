@@ -1,44 +1,53 @@
 # whose-red
 
-An agent skill that answers, when a test fails, whose red it is before anything else, with runs rather than words: `mine` (fails at the working tree, passes at the base commit in a throwaway worktree), `pre-existing` (fails at base too), `flaky` (isolated reruns disagree) or `environment` (the failure names a missing binary, module, network, permission or sandbox). One table row per failing test, a summary count, and a deselect allowed only for a row that is not `mine`.
+An agent skill that answers, when a test fails, whose red it is before anything else, with runs rather than words: `mine` (fails at the working tree, passes at the base commit in a throwaway worktree), `pre-existing` (fails at base too), `flaky` (isolated reruns disagree) or `environment` (the failure names a missing binary, module, network, permission or sandbox). One table row per failing test, a summary count, and a deselect allowed only for a row that is not `mine`. By Steve Solun. MIT.
 
-Works in Claude Code, Codex, Copilot, Cursor and any other harness that reads the [Agent Skills](https://agentskills.io) format. By Steve Solun. MIT.
+## What it does
 
-## Install
+It gives every failing test an owner, as one of four words, each earned by a run: alone three times at the working tree, once at the base commit in a throwaway worktree, with the failure text searched for an environment cause. A failure may be deselected, skipped or excluded only when its row says `pre-existing`, `flaky` or `environment`, and the row is pasted where the deselect happens; "unrelated" written next to a test name is not a verdict.
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=whose-red
+## When to reach for it
+
+Type `/whose-red`, or the agent reaches for it on its own when a task fits: a test run shows red, a failure is about to be called unrelated or pre-existing, or any test is about to be deselected or skipped.
+
+| Situation | Reach for |
+| --- | --- |
+| A test is failing and the question is whose fault it is | this skill |
+| The tests a change added must be shown to fail without the change | [red-at-base](../red-at-base) |
+
+A green run has nothing to sort; the skill ends with `failing 0`.
+
+## Prerequisites
+
+A git repository with a base commit the change grew from, and a test runner the script can drive (pytest); for another runner, the same runs are done by hand and the same rows written.
+
+## The verdict
+
+The **verdict** is one of four words, each earned by a run rather than by reading the test. Disagreement between isolated reruns is `flaky`. A pass at the base commit, in a worktree with the current test files copied over it, means the change broke it: `mine`. A failure at base whose text names a missing binary, module, network, permission or sandbox is `environment`; any other failure at base is `pre-existing`.
+
+```text
+whose-red.py <base> <id> ...
+whose-red.py <base> --paths <test files or ids>
 ```
 
-```bash
-npx skills@latest update whose-red
-```
+The first form takes the failing ids from a suite run; the second runs the suite itself and takes the failures from that. Per test it prints `| verdict | test | head | base | note |`, then `failing N: mine a, pre-existing b, flaky c, environment d`, with the resolved module path for the base worktree above the table. Exit 1 when any row says `mine`.
 
-Or, in Claude Code, as a plugin that updates itself:
+## Common questions
 
-```bash
-claude plugin marketplace add stevesolun/steveskills
-claude plugin install steveskills@steveskills
-```
+**Both arms of the A/B sorted the planted failures correctly. What did the skill change?**
+The shape of the evidence and the cost of getting it. The arm with the skill produced a table with a base run and repeat counts per failing test, which the blind grader credited (4 of 5 against 1 of 5); the baseline reached the same verdicts in prose, with nothing a reader could rerun. The failure the skill was written against was observed in 17 of 18 earlier sessions on the same repository, where nothing told the agent to look.
 
-Pick one route per agent; installing both gives you the skill twice.
+**The sandbox test fails on every machine without the binary. Can I deselect it?**
+Yes, once its row says `environment`, and the row goes where the deselect happens: the command line, the marker, the configuration entry or the commit message. A deselect that carries its row is auditable; one that does not is a self-report.
 
-## The idea
+**Why three reruns?**
+Because `flaky` is a claim about disagreement, and one run cannot disagree with itself. Three isolated runs at the working tree give an outcomes column (`P,F,P`) that is the record of what was seen.
 
-A suite goes red and the agent writes "unrelated, pre-existing" next to the failure, or reruns it alone until it passes, or deselects it to get a green run. In eighteen fresh sessions on one repository, every session met the same failing test (it needs a sandbox binary the machine does not have) and seventeen handled it ad hoc: 54 rerun or retry hits across fifteen sessions, verdicts of "pre-existing" with no run at the base commit ("I did not rerun it on the base commit"), and a `--deselect` to make the run green. The repository's own agent instructions said the opposite: flaky and infrastructure failures are represented, not retried away, and an agent's self-report is never verification.
+## It's working if
 
-The verdict is cheap to earn. Run the test alone a few times at the working tree: disagreement is `flaky`. Run it at the base commit in a worktree with the current test files: a pass there means the change broke it, `mine`. A failure there whose text names a missing binary, module, network, permission or sandbox is `environment`; any other failure there is `pre-existing`. Each verdict is a row with the runs behind it, and only a row that is not `mine` may be deselected, with the row pasted where the deselect happens.
-
-## How it runs
-
-The agent reaches for it when a test run shows red, when a failure is about to be called unrelated or pre-existing, or before any test is deselected or skipped. Typing `/whose-red` works too.
-
-1. **Collect the red.** The failed and errored ids from one suite run.
-2. **Run the three checks.** `scripts/whose-red.py <base> <id> ...` (Python, standard library and git; with no ids it runs the suite over `--paths` and takes the failures from it) runs each id alone three times at the working tree, searches the failure text for an environment cause, runs it at the base in a throwaway worktree with the import path pinned and the resolved module path printed, and prints one row per test plus `failing N: mine a, pre-existing b, flaky c, environment d`. Exit 1 when any row is `mine`.
-3. **Act by verdict.** `mine` is fixed and rerun; the other three are reported with their rows, and a deselect carries its row.
-4. **Report.** The summary line first, then the table, then what was done per row.
-
-## Sample output
+- Every failing test has a row with a head count, a base result and a note, and the summary line reads `failing N: mine a, pre-existing b, flaky c, environment d`.
+- The base worktree's `module <name> resolves to <path>` line points inside the worktree.
+- Every deselect in the change carries its row, and no row says `mine` in the final run.
 
 A real run on [stevesolun/ctx](https://github.com/stevesolun/ctx), in a scratch worktree built on `11b582a7`. The base for the run is a commit that quietly broke the parser's error path (a pre-existing failure); the working tree on top of it hides a subcommand from the help (which breaks a second test), adds a test whose outcome alternates between runs, and the machine lacks the Bubblewrap sandbox the live runner test needs.
 
@@ -71,16 +80,24 @@ This skill was also run as an A/B: a task on the repository at `11b582a7` with t
 
 On this task both arms sorted the planted failures correctly, so the pre-registered metric could not separate them; what the skill changed was the shape of the evidence (a table with a base run and repeat counts per failing test, which the grader credited) and the cost of getting it (one command). The seed failure itself was observed in 17 of 18 earlier sessions on the same repository, where nothing told the agent to look. One repetition, one repository.
 
-## Why a script
+## Where it fits
 
-"Pre-existing" and "flaky" are the two words that let a red run be reported as green, and nothing in a transcript shows whether the runs behind them happened. `whose-red.py` makes the runs, prints the resolved module path for the base worktree so a reviewer can see the base was graded and not an editable install of the current tree, and exits 1 while any row says `mine`. A deselect that carries its row is auditable; one that does not is a self-report.
+A reach-for-it-anytime standalone: whenever a run is red, before anything is deselected or called unrelated. Its neighbour is [red-at-base](../red-at-base), because the two questions about a test, whose red it is and whether it was ever red, are answered by the same kind of run at the same base commit, and the two scripts share that machinery. The index of every skill is the [root README](../README.md#skills).
+
+## Install
+
+```bash
+npx skills@latest add stevesolun/steveskills --skill=whose-red
+```
+
+Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
 
 ## Files
 
 ```text
 whose-red/
 ├── SKILL.md                    # the skill
-├── agents/openai.yaml          # Codex picker metadata
+├── agents/openai.yaml          # Codex and ChatGPT picker metadata
 └── scripts/whose-red.py        # one row per failing test, by runs; --help for options
 ```
 

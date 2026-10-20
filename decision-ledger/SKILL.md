@@ -18,7 +18,7 @@ Path: `.scratch/<effort-slug>/ledger.md`, created on first use. One line per ent
 D<n> | <source> | <decision, one sentence, in the user's words> | supersedes D<m> (when it does)
 ```
 
-`<source>` is where the decision came from: `round 2 Q4, user`, `round 2 Q4, recommendation accepted`, `round 3 Q1, user overruled: <the rejected recommendation>`, `spec review, user`. Numbers run on from the last entry and never restart, across rounds and sessions, so a later round's Q1 maps to a fresh D-number and collides with nothing. An entry is **live** until a later entry supersedes it.
+`<source>` is where the decision came from: `round 2 Q4, user`, `round 2 Q4, recommendation accepted`, `round 3 Q1, user overruled: <the rejected recommendation>`, `spec review, user`. Numbers run on from the last entry across rounds and sessions, so a later round's Q1 maps to a fresh D-number of its own. An entry is **live** until a later entry supersedes it.
 
 ## 1. Append
 

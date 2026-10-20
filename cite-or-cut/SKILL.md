@@ -30,12 +30,12 @@ Run `scripts/cite-or-cut.py DRAFT.md`. It lists, with line numbers, the sentence
 
 ## 4. Give line-level edits as pairs
 
-For each sentence the author wants changed, one pair: the original, then the revision, in the author's voice. A listed claim gets one of three edits: a citation placeholder for the author to fill (`[CITE]`), a softening to what the evidence shows, or removal. A listed overstatement is reworded to the evidence's strength or kept with the author's reason recorded next to it.
+For each sentence the author wants changed, one pair: the original, then the revision, in the author's voice. A listed claim is resolved by the rule, cite or cut: a citation placeholder for the author to fill (`[CITE]`), a softening to what the evidence shows, or removal. A listed overstatement is reworded to the evidence's strength or kept with the author's reason recorded next to it.
 
 **Done when** every listed sentence has an edit pair or a recorded reason to keep it, and the revised draft is written to a new file.
 
 ## 5. Close with the reviewer's questions
 
-Rerun the scan on the revised file and record the counts before and after. End with a short list of the questions a reviewer is likely to raise, each tied to a line.
+Rerun the scan on the revised file and record the counts before and after: the sentences still to cite or cut. End with a short list of the questions a reviewer is likely to raise, each tied to a line.
 
 **Done when** the before and after counts are in the notes, and the reviewer questions each cite a line of the revised draft.

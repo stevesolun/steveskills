@@ -15,7 +15,9 @@ not quantities.
 A number the doc marks as its own is counted apart from the source's:
 write `(computed ...)`, `(assumed ...)`, `(estimated ...)` or `(from
 memory)` after it in the same sentence. Prints one row per number with where
-it was found and the source line it matched, then
+it was found (a number whose unit sits apart from it in the source, in a column
+header say, is marked `unit apart` and still needs the eye check) and the source
+line it matched, then
 `numbers: N in doc, F found, L labelled, M not found`. Exit 1 when any number
 is neither found nor labelled: it must be quoted, labelled or removed.
 """
@@ -25,7 +27,7 @@ import re
 import subprocess
 import sys
 
-UNIT = r"(%|percent|million|billion|thousand|points?|pts|pp|ns|us|µs|ms|s|secs?|seconds?|min|minutes?|hours?|h|days?|weeks?|months?|years?|[KMGT]i?B(?:/s)?|[kmgt]b(?:ps)?|[KMG]bps|[kKMB]|x|×|rows?|users?|requests?|items?|files?|lines?|commits?|tests?|samples?|cases?|patients?|participants?)"
+UNIT = r"(%|percent|million|billion|thousand|points?|pts|pp|ns|us|µs|ms|s|secs?|seconds?|min|minutes?|hours?|h|days?|weeks?|months?|years?|[KMGT]i?B(?:/s)?|[kmgt]b(?:ps)?|[KMG]bps|[kKMB]|x|×|bytes?|rows?|users?|requests?|objects?|items?|files?|lines?|commits?|tests?|samples?|cases?|patients?|participants?)"
 NUM = re.compile(r"(?<![\w.:])(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)(?:\s?" + UNIT + r")?(?![\w:])(?!\.\d)", re.I)
 RANGE = re.compile(r"(?<![\w.:])(\d+(?:\.\d+)?)\s?(?:-|–|to)\s?(\d+(?:\.\d+)?)(?:\s?" + UNIT + r")?(?![\w:])(?!\.\d)", re.I)
 LABEL_RX = re.compile(r"\((?:computed|calculated|derived|assumed|assumption|estimated|estimate|approx\w*|from memory|my (?:own )?(?:estimate|assumption))[^)]*\)", re.I)
@@ -107,6 +109,11 @@ def find(value, unit, srcs, doc_line, value2=None):
                     ln = text.count("\n", 0, m.start())
                     line = lines[ln].strip() if ln < len(lines) else ""
                     cands.append((overlap(doc_line, line), -len(cands), name, line))
+    if not cands and unit and value2 is None:
+        # the unit may sit in a column header or the sentence before: match the bare number and say so
+        hit = find(value, "", srcs, doc_line)
+        if hit:
+            return hit[0] + ", unit apart", hit[1]
     if not cands:
         return None
     best = max(cands)
@@ -136,7 +143,7 @@ def main():
             print(f"warning: no text in {p} (scanned PDF or empty file)")
     found = labelled = missing = 0
     seen = set()
-    print(f"{'number':>14s}  {'where':24s} {'source line':40s} doc context")
+    print(f"{'number':>14s}  {'where':30s} {'source line':40s} doc context")
     for line_no, raw in enumerate(doc.splitlines(), 1):
         line = blank_skips(raw)
         items = []  # (value, value2 or None, unit, end)
@@ -162,14 +169,14 @@ def main():
             hit = find(value, unit, srcs, raw, value2=value2)
             if hit:
                 found += 1
-                print(f"{label:>14s}  {hit[0][:24]:24s} {hit[1][:40]:40s} L{line_no}: {ctx}")
+                print(f"{label:>14s}  {hit[0][:30]:30s} {hit[1][:40]:40s} L{line_no}: {ctx}")
             elif lab:
                 labelled += 1
                 kind = lab.group(0)[1:-1].split()[0].rstrip(",").lower()
-                print(f"{label:>14s}  {'labelled: ' + kind:24s} {'':40s} L{line_no}: {ctx}")
+                print(f"{label:>14s}  {'labelled: ' + kind:30s} {'':40s} L{line_no}: {ctx}")
             else:
                 missing += 1
-                print(f"{label:>14s}  {'NOT FOUND':24s} {'':40s} L{line_no}: {ctx}")
+                print(f"{label:>14s}  {'NOT FOUND':30s} {'':40s} L{line_no}: {ctx}")
     print(f"\nnumbers: {found + labelled + missing} in doc, {found} found, {labelled} labelled, {missing} not found")
     sys.exit(1 if missing else 0)
 

@@ -1,46 +1,57 @@
 # with-receipts
 
-An agent skill that delivers a number from data with its receipt: the question as resolved, the source and its freshness taken from the data, the query as it ran, a second route to the same number with the delta, and a reviewer who did not write the query. One script checks the receipt.
+An agent skill that delivers a number from data with its receipt: the question as resolved, the source and its freshness taken from the data, the query as it ran, a second route to the same number with the delta, and a reviewer who did not write the query. One script checks the receipt. By Steve Solun. MIT.
 
-Works in Claude Code, Codex, Copilot, Cursor and any other harness that reads the [Agent Skills](https://agentskills.io) format. By Steve Solun. MIT.
+## What it does
 
-## Install
+It makes a number from data checkable by someone who was not there. The number goes out with the question as it was actually resolved (entity, grain, window, timezone, filters, denominator), the source and its freshness as the newest date in the data, the query as it ran, a second route that lands on the same number with the delta, and the reviewer who tried to break it. The receipt travels with the number in the same message, every time; a number without one does not leave the session.
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=with-receipts
+## When to reach for it
+
+Type `/with-receipts`, or the agent reaches for it on its own when a task fits: answering a data question with a number, producing a metrics report, or sending a number to a stakeholder, a board pack or a dashboard.
+
+| Situation | Reach for |
+| --- | --- |
+| One number is leaving the session and someone will act on it | this skill |
+| The same questions must stay right across every change to the data model or the definitions | [answer-key](../answer-key) |
+| The number is known and the question is why it moved | [driver-split](../driver-split) |
+
+Exploratory profiling with no number leaving the session needs no receipt.
+
+## Prerequisites
+
+Python 3. The extract as a CSV for the freshness, compare and sum commands (or the equivalent `max(date)` and comparison in the query itself), and a second route to the number: a compiled metric beside raw SQL, two sources, a decomposition whose parts must add up, or the blessed dashboard for the same period. The reviewer is a subagent where the harness has one, otherwise a colleague.
+
+## The receipt
+
+A **receipt** is the set of facts that lets a reader check a number without trusting the sentence that delivered it. Most wrong answers from data come from a plausible wrong entity ("active users" with the wrong lookback), a stale definition, or a silent, plausible number nobody challenged; Anthropic's own data team, writing about running most of its business analytics through an agent, reports that an adversarial review of every query bought about six points of accuracy and that every answer carries a provenance footer with source, freshness, reviewer and owner. The receipt is that footer as the unit of delivery, with the pieces checked mechanically rather than asserted.
+
+```text
+receipts.py freshness DATA.csv --date-col <col>
+receipts.py compare A.csv B.csv --key <key> --value <value>
+receipts.py sum PARTS.csv --value <value> --total <N>
+receipts.py footer ANSWER.md
 ```
 
-```bash
-npx skills@latest update with-receipts
-```
+`freshness` prints the newest date in the data and its distance from today. `compare` prints one row per key with the delta and a verdict, `agree`, `DISAGREE` or `only on one side`, then the totals. `sum` checks that parts add up to a reported total. `footer` lists the seven fields of the `receipt:` block (`question`, `source`, `freshness`, `query`, `cross-check`, `delta`, `reviewed`) and exits 0 only when all seven are present.
 
-Or, in Claude Code, as a plugin that updates itself:
+## Common questions
 
-```bash
-claude plugin marketplace add stevesolun/steveskills
-claude plugin install steveskills@steveskills
-```
+**The two routes disagree. Which number goes out?**
+The one whose definition the receipt names. A disagreement is usually two definitions rather than a bug: in the sample run, counting the committer instead of the author moved one count by one and put seventeen commits under "GitHub", because squash merges are committed by GitHub. The script reports the disagreement rather than averaging it away, and the `delta` line says which reading the headline follows.
 
-Pick one route per agent; installing both gives you the skill twice.
+**What counts as freshness?**
+The newest date in the data, read from the extract or by `max(date)` in the query, rather than the calendar. In the sample run that was 740 days before the day of the run, which a window that ran to "last month" would have hidden. A window that runs past the freshness date is cut back to the last complete period.
 
-## The idea
+**Who is the reviewer when I work alone?**
+A subagent where the harness has one, otherwise a colleague, looking for the wrong entity, wrong window, missing filter, wrong denominator and a stale table. The footer needs the reviewer's name or role and the round number; the author of the query signing their own work is the one witness the receipt refuses.
 
-Analytics is a context and verification problem before it is a code problem: most wrong answers come from picking a plausible wrong entity ("active users" with the wrong lookback), from a stale definition, or from a silent, plausible number that nobody challenged. Anthropic's own data team, writing about running most of its business analytics through an agent, reports that an adversarial review of every query bought about six points of accuracy and that every answer carries a provenance footer with source, freshness, reviewer and owner, because a wrong-but-plausible answer is the one failure nothing else catches.
+## It's working if
 
-`with-receipts` makes that footer the unit of delivery. A number goes out with the question as it was actually resolved (entity, grain, window, timezone, filters, denominator), the source and its freshness as the newest date in the data, the query as it ran, a second route that lands on the same number with the delta, and the reviewer who tried to break it. The script checks the pieces mechanically: two routes agree, parts add up, the freshness line is real, the footer is complete.
-
-## How it runs
-
-The agent reaches for it when a data question is answered with a number, when a metrics report is produced, or when a number is about to go to a stakeholder, a board pack or a dashboard. Typing `/with-receipts` works too.
-
-1. **Resolve the question** in one line that names the entity, grain, window (the last complete period), timezone, filters and denominator; unknown terms are looked up, then confirmed.
-2. **Pick the source and read its freshness.** `receipts.py freshness DATA.csv --date-col <col>`: the newest date in the data, rather than the calendar.
-3. **Run the query and keep it** verbatim, with its row count.
-4. **Cross-check by a second route.** `receipts.py compare A.csv B.csv --key k --value v` or `receipts.py sum PARTS.csv --value v --total N`. A disagreement is usually two definitions; the receipt names which one the number follows.
-5. **Review by someone who did not write it**, with blocking findings fixed and re-reviewed.
-6. **Deliver with the footer.** `receipts.py footer ANSWER.md` exits 0 only when all seven fields are present.
-
-## Sample output
+- The number arrives with a `receipt:` block of seven lines, and the trace shows `receipts.py footer` printing `7 of 7 fields present`.
+- A cross-check command ran, its verdict line is quoted next to the number, and a disagreement is explained as two definitions rather than smoothed over.
+- The freshness line is a date read from the data, with its distance from today.
+- The `reviewed` line names someone other than the query's author, with the round.
 
 A real run on the git history of [vuejs/vue](https://github.com/vuejs/vue) (212k stars), clone at `9e887079`, exported to a CSV of 3,593 commits. Question as resolved: commits in calendar 2023, counted per author name, the whole repository. Route A is a Python pass over the export, route B is `git log` on the repository itself.
 
@@ -91,16 +102,24 @@ receipt: 7 of 7 fields present
 
 Remove the `reviewed` line and the footer check reports `6 of 7 fields present; missing reviewed` with exit code 1.
 
-## Why a script
+## Where it fits
 
-"I double-checked it" is the same witness twice. `receipts.py` makes the cross-check a comparison of two files, the freshness a max over a column, and the footer a list of seven fields with an exit code, so a reviewer, a pre-send hook or the next analyst can see what was checked without trusting the sentence that says it was.
+A reach-for-it-anytime standalone for the data role, and the one the other data answers end in: a split or a readout is still a number going to someone. Its neighbours are [answer-key](../answer-key), because a receipt covers one number on one day and the key keeps a whole set of them right over time, and [driver-split](../driver-split), because once the number has its receipt the next question is usually why it moved. The index of every skill is the [root README](../README.md#skills).
+
+## Install
+
+```bash
+npx skills@latest add stevesolun/steveskills --skill=with-receipts
+```
+
+Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
 
 ## Files
 
 ```text
 with-receipts/
 ├── SKILL.md                  # the skill
-├── agents/openai.yaml        # Codex picker metadata
+├── agents/openai.yaml        # Codex and ChatGPT picker metadata
 └── scripts/receipts.py       # freshness, compare, sum, footer; --help for options
 ```
 

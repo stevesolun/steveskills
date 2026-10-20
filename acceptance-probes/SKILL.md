@@ -18,7 +18,7 @@ Fetch the ticket. List its acceptance criteria as `C1..Cn`, verbatim.
 
 ## 2. Write one probe per criterion
 
-Before any implementation code exists, and from the ticket's wording alone (where the harness has subagents, dispatch one that sees the ticket and the repository and nothing of the plan), write `.scratch/<ticket-id>/probes.sh`: one function per criterion that runs a command (a test invocation, a CLI call diffed against expected output, a curl, a grep for a symbol) and prints `C<k> PASS` or `C<k> FAIL`; the script exits non-zero if any line is `FAIL`. A criterion no command can answer ("the code is readable") gets a line `C<k> HUMAN` and a one-line reason. Grep source files, never build output, so a stale cache cannot flip a verdict.
+Before any implementation code exists, and from the ticket's wording alone (where the harness has subagents, dispatch one that sees the ticket and the repository and nothing of the plan), write `.scratch/<ticket-id>/probes.sh`: one function per criterion that runs a command (a test invocation, a CLI call diffed against expected output, a curl, a grep for a symbol) and prints `C<k> PASS` or `C<k> FAIL`; the script exits non-zero if any line is `FAIL`. A criterion no command can answer ("the code is readable") gets a line `C<k> HUMAN` and a one-line reason. Grep source files: a build output can be stale and flip a verdict.
 
 **Done when** every criterion has a function or a `HUMAN` line.
 
@@ -33,9 +33,9 @@ Commit the script. **Done when** every probed criterion reads `FAIL` at the star
 
 ## 4. Implement
 
-Hand the work to the build step: call the Skill tool with "tdd" at the agreed seams, or follow the implementer's own flow. The probes stay untouched during implementation; a probe edited to pass is a self-report again.
+Hand the work to the build step: the repository's test-first flow where it has one, else the implementer's own. The probes stay untouched during implementation; a probe edited to pass is a self-report again.
 
-**Done when** the implementer reports done.
+**Done when** the implementation is committed and the probes file's checksum is unchanged since step 3.
 
 ## 5. Run at the end
 

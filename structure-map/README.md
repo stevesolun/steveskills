@@ -1,45 +1,53 @@
 # structure-map
 
-An agent skill that writes or refreshes a repository structure map: the facts a fresh agent cannot recover from the file tree in under a minute, each paired with the command that proves it and the output to expect. One script runs every proof and reports `confirmed C, stale S`; the map is committed only after that reads `stale 0`.
+An agent skill that writes or refreshes a repository structure map: the facts a fresh agent cannot recover from the file tree in under a minute, each paired with the command that proves it and the output to expect. One script runs every proof and reports `confirmed C, stale S`; the map is committed only after that reads `stale 0`. By Steve Solun. MIT.
 
-Works in Claude Code, Codex, Copilot, Cursor and any other harness that reads the [Agent Skills](https://agentskills.io) format. By Steve Solun. MIT.
+## What it does
 
-## Install
+It writes the handful of structural facts every fresh session otherwise re-learns, and makes the file executable: each entry carries the command that recovers the fact and the output to expect, so running the file confirms or stales every line. The map admits only facts that take more than one `ls`, one file read or one `--help` to recover, and it stays under 60 lines.
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=structure-map
+## When to reach for it
+
+Type `/structure-map`, or the agent reaches for it on its own when a task fits: a session rediscovers dependency direction, the canonical file to edit or a generated directory, an agent is onboarding to an unfamiliar repository, or you ask it to document how the repo is laid out.
+
+| Situation | Reach for |
+| --- | --- |
+| A structural fact is re-learned every session and a listing does not show it | this skill |
+| A tool result is bigger than the task used, or the same lookup repeats within a session | [tool-diet](../tool-diet) |
+| A session is ending and the next piece of work needs naming | [reconcile](../reconcile) |
+
+A fact one listing shows belongs to the tree, not the map; the minute test drops it.
+
+## Prerequisites
+
+A git repository. The map is written to `docs/STRUCTURE.md` (or wherever the repository's agent docs already point), with one line pointing at it added to the agent instructions if none is there.
+
+## The map
+
+The **map** holds exactly the facts a tree walk does not recover in a minute, each as `- <fact, one sentence> | proof: \`<command>\` | expect: <output>`, where `expect` is a backticked fragment the output contains, a bare number, `empty`, or `exit <code>`. The **proof** is the command a fresh agent would otherwise have had to work out, and an entry whose command returns something else is stale:
+
+```text
+map-check.py docs/STRUCTURE.md
 ```
 
-```bash
-npx skills@latest update structure-map
-```
+It runs every proof read-only from the repository root, prints `confirmed` or `STALE` per entry with each stale entry's command and actual output under it, then `confirmed C, stale S`. Exit 0 means every entry confirmed, at least one entry, and the file within the cap; exit 2 means there is no map yet.
 
-Or, in Claude Code, as a plugin that updates itself:
+## Common questions
 
-```bash
-claude plugin marketplace add stevesolun/steveskills
-claude plugin install steveskills@steveskills
-```
+**Two entries were recoverable with a single `ls`. Does that matter?**
+It is the one clause the A/B below left unmet (two of nineteen, one more than the limit), and it matters because every line of the map costs attention in every session that reads it. The minute test is applied before writing: one `ls`, one file read or one `--help` fails it, a search across files, a history walk or a comparison of two files passes.
 
-Pick one route per agent; installing both gives you the skill twice.
+**The expect was written from memory and the proof said otherwise. Which wins?**
+The run. In the sample below one entry's expect was written from memory rather than from a run, the check flagged it with the actual output, and the entry was corrected from that output. The expect is always copied from a run in the current session.
 
-## The idea
+**How long can the map be?**
+Under 60 lines, checked by the script. A first version of this skill without the runner lost the A/B on the one bullet that said every proof passes; this version makes that bullet an exit code.
 
-Every fresh session re-learns the same handful of structural facts: dependencies run from this package to that one and not back, this file is the canonical one of three that look alike, that directory is rewritten on commit, the root state file is frozen history and the live one is two levels down. A directory listing shows none of this, and a layout document written from memory goes stale the week after it is written, with nobody able to tell which lines still hold.
+## It's working if
 
-The map admits only facts that take more than one `ls`, one file read or one `--help` to recover, and every entry carries the command that recovers it plus the output to expect. That makes the file executable: run the commands, compare the outputs, and every entry is confirmed or stale. Stale entries are fixed from the actual output or removed, and the file stays under 60 lines.
-
-## How it runs
-
-The agent reaches for it when a session rediscovers dependency direction, the canonical file to edit or a generated directory, when onboarding to an unfamiliar repository, or when you ask it to document how the repo is laid out. Typing `/structure-map` works too.
-
-1. **Check what is already there.** `scripts/map-check.py docs/STRUCTURE.md` runs every proof, prints `confirmed` or `STALE` per entry with the stale entries' commands and actual output, and ends with `confirmed C, stale S`. Stale entries are fixed or removed first.
-2. **Hunt for facts.** Every moment in the session where an agent needed more than one command to answer where something lives, which file is canonical, what imports what, or whether something is generated.
-3. **Apply the minute test.** A fact one `ls`, one read or one `--help` recovers is dropped.
-4. **Write the entries.** `- <fact> | proof: \`<command>\` | expect: <output>`, with the expect copied from a run, under at most four headings.
-5. **Confirm, then commit.** The script runs again; its exit 0 (every entry confirmed, at least one entry, under the cap) is the completion criterion, and the commit comes after it.
-
-## Sample output
+- `docs/STRUCTURE.md` is under 60 lines, and every entry has a proof command and an expect copied from a run.
+- `map-check.py` reports `stale 0` before the commit that carries the map, and the report reads `<N> entries: <K> confirmed, <F> fixed, <R> removed, <A> added`.
+- A fresh session reads the map and skips the search it would otherwise have run.
 
 A real run on [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7`, in a scratch worktree where a seven-entry `docs/STRUCTURE.md` was written. One entry's expect was written from memory rather than from a run.
 
@@ -83,16 +91,24 @@ This version was then run as its own A/B: the same task (document how the reposi
 
 The design's one unmet clause: two of the nineteen entries were recoverable with a single `ls` or file read, one more than the limit. One repetition, one repository; the full A/B material is reproducible from the pinned commit.
 
-## Why a script
+## Where it fits
 
-A layout document is a set of claims about the repository, and claims age. `map-check.py` turns each one into a command and an expected output, runs them read-only, and prints the actual output under every entry that no longer holds. The exit code is 0 only when every entry is confirmed and the file is under the cap, so a pre-commit hook or a reviewer can refuse a map that has gone stale without reading the repository.
+Periodic maintenance: refreshed whenever a session rediscovers something the map should have said, and checked before each commit that touches it. Its neighbours are [tool-diet](../tool-diet), because a lookup rebuilt in every session is sometimes a fact for the map and sometimes a fat result to cut, and [reconcile](../reconcile), because the closing report hands the next session its work while the map hands it the layout. The index of every skill is the [root README](../README.md#skills).
+
+## Install
+
+```bash
+npx skills@latest add stevesolun/steveskills --skill=structure-map
+```
+
+Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
 
 ## Files
 
 ```text
 structure-map/
 ├── SKILL.md                    # the skill
-├── agents/openai.yaml          # Codex picker metadata
+├── agents/openai.yaml          # Codex and ChatGPT picker metadata
 └── scripts/map-check.py        # runs every proof, prints confirmed and stale; --help for the expect rules
 ```
 

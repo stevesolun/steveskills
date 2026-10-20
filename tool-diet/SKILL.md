@@ -33,6 +33,8 @@ Match each large result against these kinds. Each reads _what it is_ → _the cu
 - **Raw blob**: minified bundles, lockfiles, generated code, base64, binary dumps. → Skip them by default; extract the one field with a parser.
 - **Missing wrapper**: a multi-step lookup rebuilt by hand in every session. → One script in the repo with a `--help`, so the lookup is one short command.
 
+**Done when** each result from step 1 carries one kind from this list and the cut that kind calls for.
+
 ## 3. Cut it where the next session finds it
 
 Before touching the repo, show the user the fat you found and the cut you intend for each; if they are away, proceed. Cut the fattest result first. Prefer the cheapest cut that outlives this session, in this order:
@@ -43,6 +45,8 @@ Before touching the repo, show the user the fat you found and the cut you intend
 4. **One line** in the repo's agent instructions, only for a lean form that most sessions need and none would guess. That file loads on every turn, so everything else stays out of it.
 
 A cut applied only to the current call is right when the fat is local to this task. Say so, so nobody hunts for a durable cut later.
+
+**Done when** every cut from step 2 is applied at the level chosen for it, or is shown to the user and waiting on their word.
 
 ## 4. Prove it
 
