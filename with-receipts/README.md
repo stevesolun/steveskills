@@ -42,43 +42,49 @@ The agent reaches for it when a data question is answered with a number, when a 
 
 ## Sample output
 
-A real run on the bug tracker in [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7` (92 rows). Question as resolved: P0 or P1 bugs whose fix status is anything other than Fixed, per journey, whole tracker. Route A is a Python pass over the CSV, route B is SQL over the same rows in SQLite.
+A real run on the git history of [vuejs/vue](https://github.com/vuejs/vue) (212k stars), clone at `9e887079`, exported to a CSV of 3,593 commits. Question as resolved: commits in calendar 2023, counted per author name, the whole repository. Route A is a Python pass over the export, route B is `git log` on the repository itself.
 
 ```text
-$ receipts.py compare open_python.csv open_sql.csv --key journey --value n
-key                                   A              B        delta  verdict
-budget                                4              4           +0  agree
-recommend                             1              1           +0  agree
-trials                                1              1           +0  agree
+$ receipts.py freshness vue-commits.csv --date-col date
+freshness: 3593 rows, 3593 dated, max date = 2024-10-10, 740 days before today
 
-cross-check: 3 agree, 0 disagree, 0 only on one side (tolerance 0)
+$ receipts.py compare 2023_by_author_python.csv 2023_by_author_gitlog.csv --key author --value commits
+key                                   A              B        delta  verdict
+Adam Hines                            1              1           +0  agree
+Evan You                             30             30           +0  agree
+Grigorii K. Shartsev                  1              1           +0  agree
+...
+webfansplz                            4              4           +0  agree
+xonx                                  2              2           +0  agree
+
+cross-check: 13 agree, 0 disagree, 0 only on one side (tolerance 0)
 ```
 
-The same question with "open" read as Deferred only, the other reading a reader could take, gives a different table, and the script says so instead of averaging it away:
+The other reading of "whose commit", the committer instead of the author, gives a different table, and the script says so instead of averaging it away: squash merges are committed by GitHub.
 
 ```text
-$ receipts.py compare open_python.csv open_deferred_only.csv --key journey --value n
+$ receipts.py compare 2023_by_author_python.csv 2023_by_committer.csv --key author --value commits
 key                                   A              B        delta  verdict
-budget                              4.0              -               only on one side
-recommend                             1              1           +0  agree
-trials                              1.0              -               only on one side
-
-cross-check: 1 agree, 0 disagree, 2 only on one side (tolerance 0)
+Evan You                             30             29           -1  DISAGREE
+GitHub                                -           17.0               only on one side
+webfansplz                          4.0              -               only on one side
+...
+cross-check: 0 agree, 1 disagree, 13 only on one side (tolerance 0)
 ```
 
 Exit code 1. The receipt then names the definition the number follows. The decomposition and the footer check:
 
 ```text
-$ receipts.py sum open_python.csv --value n --total 6
-sum of 3 parts = 6; reported total = 6; delta +0; parts add up (tolerance 0)
+$ receipts.py sum 2023_by_author_python.csv --value commits --total 46
+sum of 13 parts = 46; reported total = 46; delta +0; parts add up (tolerance 0)
 
 $ receipts.py footer answer.md
-  question     ok    P0 or P1 bugs whose fix_status is not Fixed (Already Fixed and Deferred both count), per j
-  source       ok    qa/ctx_fit_bug_tracker.csv at 11b582a7 (92 rows)
-  freshness    ok    tracker rows carry no date; file last changed in commit 11b582a7
-  query        ok    select journey, count(*) from bugs where severity in ('P0','P1') and fix_status<>'Fixed' g
-  cross-check  ok    same count from a python pass over the CSV with the same definition
-  delta        ok    0 on 3 of 3 journeys; a reading of "open" as Deferred only gives 1, so the definition abov
+  question     ok    commits whose author date falls in calendar 2023 (UTC dates as git records them), counted
+  source       ok    git history of vuejs/vue, clone at 9e887079, exported to vue-commits.csv (3593 rows)
+  freshness    ok    newest commit date in the export 2024-10-10, 740 days before today
+  query        ok    git log --since=2023-01-01 --until=2024-01-01 --format=%aN HEAD | sort | uniq -c
+  cross-check  ok    a python pass over vue-commits.csv with the same window and the same author-name column
+  delta        ok    0 on 13 of 13 authors; counting the committer instead of the author gives Evan You 29 and
   reviewed     ok    second pass by a reviewer that did not write the query, round 1, no blocking findings
 receipt: 7 of 7 fields present
 ```

@@ -41,41 +41,49 @@ The agent reaches for it when asked why a metric fell or rose, what is driving a
 
 ## Sample output
 
-Two real splits from [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7`. First, a rate: the fix rate of the bug tracker, high-severity bugs (P0 and P1, 34 bugs) against lower-severity ones (P2 and P3, 58 bugs), split by journey.
+Two real splits on [vuejs/vue](https://github.com/vuejs/vue) (212k stars) between the tags `v2.6.14` and `v2.7.16`, the release that rewrote the codebase in TypeScript. First, a ratio: the average length of a source file under `src/`, split by area. Weight is each area's share of files; rate is its lines per file.
 
 ```text
-$ driver-split.py fixrate.csv
-overall rate: 82.35% -> 81.03%  change -1.32 pts
+$ driver-split.py lines-per-file.csv --unit abs
+overall rate: 93.69 -> 110.94  change +17.25
 segment                     weight              rate      mix     rate    inter    total
-trials                38.2%-> 12.1%   92.3%->  42.9%    -2.60   -18.91   +12.94    -8.57
-budget                32.4%->  6.9%   63.6%->  75.0%    +4.76    +3.68    -2.89    +5.55
-analysis               2.9%-> 29.3%  100.0%->  94.1%    +4.65    -0.17    -1.55    +2.93
-json                   5.9%-> 13.8%  100.0%->  75.0%    +1.40    -1.47    -1.98    -2.05
-recommend             17.6%-> 13.8%   83.3%->  87.5%    -0.04    +0.74    -0.16    +0.54
-surface                2.9%-> 24.1%  100.0%->  85.7%    +3.74    -0.42    -3.03    +0.29
+platforms             46.9%-> 27.7%   58.01->  68.93    +6.85    +5.12    -2.10    +9.88
+core                  30.9%-> 40.5%  109.68-> 119.93    +1.54    +3.17    +0.99    +5.69
+compiler               9.3%-> 12.2%  177.00-> 185.61    +2.40    +0.80    +0.25    +3.45
+server                11.3%->  0.0%  119.59->   0.00    -2.94   -13.56   +13.56    -2.94
+v3                     0.0%-> 12.2%    0.00-> 105.50   -11.39    +0.00   +12.83    +1.44
+src                    0.0%->  0.7%    0.00->  17.00    -0.63    +0.00    +0.11    -0.52
+shared                 1.0%->  1.4%  182.50-> 199.00    +0.28    +0.17    +0.05    +0.51
+sfc                    0.5%->  0.0%  134.00->   0.00    -0.21    -0.69    +0.69    -0.21
+types                  0.0%->  5.4%    0.00->  92.75    -5.06    +0.00    +5.01    -0.05
 
-parts: -1.32  change: -1.32  add up
-largest driver: trials (-8.57); the overall change is only -1.32 because other parts offset it
+parts: +17.25  change: +17.25  add up
+largest driver: platforms (+9.88 of +17.25, 57% of the move)
 ```
 
-The headline number barely moved. Inside it, the trials journey's fix rate fell from 92% to 43%, worth 19 points on its own, and was hidden by the mix shifting toward journeys that fix almost everything. That is the finding a paragraph would have missed.
+Files got 17 lines longer on average. The largest part is `platforms`, and the split says why in two numbers: its files did get longer (+5.12, the rate effect), but more of its contribution is mix (+6.85): the shortest-file area shrank from 47% to 28% of the codebase when the Weex platform was dropped, which pulls the average up without any file changing. A paragraph would have said "TypeScript made the files longer" and been half right.
 
-Second, a total: Python lines by area between a tagged release and the pinned commit.
+Second, a total: lines of source under `src/` by area.
 
 ```text
 $ driver-split.py loc.csv
-overall total: 395044 -> 396055  change +1011
+overall total: 18176 -> 16419  change -1757
 segment                    before        after       change    share
-src/tests                  198219       198861         +642      64%
-src/ctx                    128322       128741         +419      41%
-scripts                     29430        29283         -147     -15%
-src (flat)                  37389        37486          +97      10%
-hooks                         393          393           +0       0%
-imported-skills              1291         1291           +0       0%
+server                       2631            0        -2631     150%
+platforms                    5279         2826        -2453     140%
+v3                              0         1899        +1899    -108%
+types                           0          742         +742     -42%
+core                         6581         7196         +615     -35%
+compiler                     3186         3341         +155      -9%
+sfc                           134            0         -134       8%
+shared                        365          398          +33      -2%
+src                             0           17          +17      -1%
 
-parts: +1011  change: +1011  add up
-largest driver: src/tests (+642 of +1011, 64% of the move)
+parts: -1757  change: -1757  add up
+largest driver: server (-2631); the overall change is only -1757 because other parts offset it
 ```
+
+The net change is small and misleading on its own: server rendering and Weex left the tree, the Vue 3 compatibility layer and the type definitions arrived, and the script reports the offsetting parts instead of the net.
 
 ## Why a script
 

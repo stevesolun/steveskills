@@ -41,28 +41,32 @@ The agent reaches for it when asked to clean, normalise, dedupe or fix a data fi
 
 ## Sample output
 
-A real cleaning pass over the benchmark status tracker in [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7`: trim every cell, lower-case the area, turn the status into a slug, drop rows without an id and duplicate ids.
+A real cleaning pass over the author table of [vuejs/vue](https://github.com/vuejs/vue) (212k stars): one row per commit with the author name and email as git recorded them, 3,593 rows. Three rules: trim every cell, lower-case the email, and give each email one display name (the name it was recorded with most often). Fourteen emails had been recorded under more than one name.
 
 ```text
-$ clean-log.py qa/ctx_benchmark_status.csv bench_clean.csv --key id
-before: qa/ctx_benchmark_status.csv (43 rows, 11 cols, sha256 8180b6dc57b7)
-after:  bench_clean.csv (43 rows, 11 cols, sha256 d80a8f5c82a2)
+$ clean-log.py authors-raw.csv authors-clean.csv --key sha --sample 3
+before: authors-raw.csv (3593 rows, 4 cols, sha256 4b91e8e56145)
+after:  authors-clean.csv (3593 rows, 4 cols, sha256 8d80fa138970)
 
-columns: 11 after (0 added, 0 removed)
+columns: 4 after (0 added, 0 removed)
 
-rows (by id): 43 -> 43; removed 0, added 0, kept 43; duplicate keys before 0, after 0
+rows (by sha): 3593 -> 3593; removed 0, added 0, kept 3593; duplicate keys before 0, after 0
 
-cells changed in kept rows: 43 across 1 columns
-  status: 43 changed; case 29, normalised 14
-      case: 'Resolved' -> 'resolved'
-      case: 'Resolved' -> 'resolved'
-      normalised: 'Needs Validation' -> 'needs-validation'
-      normalised: 'Needs Validation' -> 'needs-validation'
+cells changed in kept rows: 107 across 2 columns
+  email: 61 changed; case 61
+      case: '43554061+Moriango@users.noreply.github.c' -> '43554061+moriango@users.noreply.github.c'
+      case: '67939848+Rudeus3Greyrat@users.noreply.gi' -> '67939848+rudeus3greyrat@users.noreply.gi'
+      case: 'Orkhan.Alikhanov@gmail.com' -> 'orkhan.alikhanov@gmail.com'
+  author: 46 changed; value replaced 45, case 1
+      value replaced: 'Carlos Rodrigues' -> 'pikax'
+      value replaced: 'Carlos Rodrigues' -> 'pikax'
+      value replaced: 'Carlos Rodrigues' -> 'pikax'
+      case: 'pooya parsa' -> 'Pooya Parsa'
 
-change log: rows 43->43, columns 11->11, cells changed 43
+change log: rows 3593->3593, columns 4->4, cells changed 107
 ```
 
-Two rules were written for the area column and for whitespace; the log shows zero cells changed in either, which is the reconciliation step doing its job: the file had no stray whitespace and the areas were already lower case, so those rules did nothing, and the log says so instead of the paragraph claiming they did.
+Every line maps to a rule: the 61 email changes are rule two, the 46 author changes are rule three, and the trim rule changed nothing, which the log states by omission rather than the write-up claiming otherwise. The log also surfaces a rule choice to revisit: "most frequent name" turned a real name into a handle for one contributor, which is exactly the kind of change a narrated log would have described as "normalised author names" and moved on.
 
 ## Why a script
 

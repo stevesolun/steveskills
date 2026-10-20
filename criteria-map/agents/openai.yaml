@@ -1,0 +1,3 @@
+interface:
+  display_name: "Criteria Map"
+  short_description: "A proposal laid over its review criteria: words per criterion, thin spots, placeholders"

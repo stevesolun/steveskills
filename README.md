@@ -28,6 +28,10 @@ The directory grows one folder at a time. The table below is the index.
 | [answer-key](./answer-key) | Keeps a file of data questions with known answers, runs it on every change to the data model, definitions or analysis skill, logs each run with its git SHA, and gates on the pass rate. |
 | [clean-log](./clean-log) | Cleans a data file by script and ships it with a change log computed from the two files: rows, columns, and per-column cell changes by kind, with checksums. |
 | [ab-readout](./ab-readout) | Writes up an A/B test from its counts in the only safe order: sample ratio mismatch, rates with intervals, lift with its interval and p-value, detectable effect, then one verdict line. |
+| [number-trace](./number-trace) | Summarises a paper, report or analysis so that every number in the summary traces to the source text or a computed output, and every number that does not is labelled assumed, remembered or missing. |
+| [source-bound](./source-bound) | Builds a memo or literature map from the sources given and nothing else: inventories what could be read, resolves every citation against it, marks single-source points, and lists the unreadable and the unused. |
+| [cite-or-cut](./cite-or-cut) | Revises a draft in the author's voice with a scan that lists, by line, every sentence that asserts without support or overstates the evidence, and edits them as original-then-revised pairs. |
+| [criteria-map](./criteria-map) | Drafts a proposal against the criteria it will be judged on and maps it: words per criterion, the thin and the unmapped, and every placeholder still open. |
 
 More folders will land here. Each one carries its own README with details and sample output.
 
@@ -101,6 +105,10 @@ Prompts that make the agent reach for each skill without being told, and what co
 | answer-key | "We changed the revenue definition; is the analytics agent still right?" / "Can we launch the finance domain to stakeholders?" | `P of N pass (rate)` per run, one row per question with expected and actual, a log row with git SHA and label, exit 1 under the gate. |
 | clean-log | "Clean this export and tell me everything you changed." | The cleaning as a script with dropped rows in a side file, and a log computed from the two files: rows by key, columns, cells changed per column by kind with examples, both checksums. |
 | ab-readout | "Write up the checkout test and tell me whether to ship it." | SRM check, rate per arm with interval, lift with interval and p-value, smallest detectable effect and sample needed, then one verdict line that is the only recommendation. |
+| number-trace | "Help me understand this paper, with the key numbers quoted." / "Write up the analysis of this file using only numbers you computed." | One row per number in the summary: found in which source, or NOT FOUND; `numbers: N in doc, F found, M not found`; every unfound number labelled in the text. |
+| source-bound | "Turn this folder of papers into a memo." / "Map my literature from the PDFs I collected." | The inventory (readable or not, per file), citations resolved against it, UNRESOLVED ones named, unused files listed, sentences resting on one source marked. |
+| cite-or-cut | "Revise this section before I send it to my advisor." / "Which sentences need a citation?" | The one structural issue, the flow, edit pairs, and `claims: C, unsupported U, overstated O` by line, before and after the pass. |
+| criteria-map | "Draft the grant against these review criteria." / "Which criteria does my proposal address weakly?" | Words and share per criterion, the mapped sections, NONE and THIN flags, and every placeholder with its line. |
 
 Every skill ends in a number or an artifact a second pair of eyes can check, never in the agent's own assessment of its work.
 

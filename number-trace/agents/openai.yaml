@@ -1,0 +1,3 @@
+interface:
+  display_name: "Number Trace"
+  short_description: "Every number in a summary traces to the source, or is labelled"

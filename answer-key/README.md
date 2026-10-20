@@ -41,30 +41,27 @@ The agent reaches for it when a data model, metric definition, reference doc or 
 
 ## Sample output
 
-A real run on a SQLite copy of the bug tracker in [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7`, with six questions, one of them carrying an expected value from before the last triage pass.
+A real run over the git history of [vuejs/vue](https://github.com/vuejs/vue) (212k stars), clone at `9e887079`, loaded into SQLite as one row per commit. Six questions; every expected value was verified with an independent `git` command before it went into the key, except K6, whose value was verified at the `v2.7.0` tag and left there on purpose.
 
 ```text
-$ answer-key.py key.csv --sqlite bugs.sqlite --gate 0.9 --label tracker-v1 --log answer-key-log.csv
+$ answer-key.py key.csv --sqlite vue.sqlite --gate 0.9 --label commits-v1 --log answer-key-log.csv
 id         verdict      expected       actual  question
-K1         pass               92           92  How many bugs are in the tracker?
-K2         pass               11           11  How many P0 bugs?
-K3         pass             81.5         81.5  Share of bugs marked Fixed (percent)
-K4         pass                6            6  Open (not Fixed) P0 or P1 bugs
-K5         pass           trials       trials  Journey with the most bugs
-K6         FAIL                9            7  Deferred bugs (a stale expected value, from before the last triage)
+K1         pass             3593         3593  How many commits are in the repository?
+K2         pass               46           46  How many commits landed in 2023?
+K3         pass         Evan You     Evan You  Who authored the most commits?
+K4         pass             71.9         71.9  What share of all commits did the top author write (percent)?
+K5         pass       2016-04-10   2016-04-10  When was the first commit?
+K6         FAIL              228          229  How many commits touched 10 or more files? (expected value verified at
 
 answer key: 5 of 6 pass (83%); failed K6; errors none; 0.0s
 logged to answer-key-log.csv
-```
 
-Exit code 1: 83 percent is under the 90 percent gate. The log row:
-
-```text
+$ cat answer-key-log.csv
 time,git_sha,key_sha,label,n,pass,rate,elapsed_s,failed_ids
-2026-10-20T13:38:45,11b582a7,148c47fdbb16,tracker-v1,6,5,0.833,0.0,K6
+2026-10-20T14:01:57,9e887079,993e848f2e8c,commits-v1,6,5,0.833,0.0,K6
 ```
 
-K6 is the first kind of failure, a stale expected value: the tracker moved from 9 deferred bugs to 7 and the key did not. The fix is a new verified value with the person who closed the two, and the log keeps the run that caught it.
+Exit code 1: 83 percent is under the 90 percent gate. K6 is the first kind of failure, a stale expected value: one more large commit landed after 2.7.0 and the key did not move. The run before this one is worth telling too: a first draft of the key had two values written from memory (a first-commit date of 2013, a share of 68.6 percent), and both failed against the data. That is the key doing its job on its author.
 
 ## Why a script
 

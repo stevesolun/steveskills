@@ -58,12 +58,13 @@ def rate_split(rows, unit):
         parts.append((r["segment"], mix * scale, rate * scale, inter * scale, (mix + rate + inter) * scale, w0, w1, r0, r1))
     delta = (R1 - R0) * scale
     total = sum(p[4] for p in parts)
-    u = "pts" if unit == "pts" else ""
-    print(f"overall rate: {R0*100:.2f}% -> {R1*100:.2f}%  change {delta:+.2f} {u}".rstrip())
+    pct = unit == "pts"
+    fmt_r = (lambda r: f"{r*100:6.1f}%") if pct else (lambda r: f"{r:7.2f}")
+    print(f"overall rate: {fmt_r(R0).strip()} -> {fmt_r(R1).strip()}  change {delta:+.2f}" + (" pts" if pct else ""))
     print(f"{'segment':20s} {'weight':>13s} {'rate':>17s} {'mix':>8s} {'rate':>8s} {'inter':>8s} {'total':>8s}")
     for p in sorted(parts, key=lambda p: -abs(p[4])):
         seg, mix, rate, inter, tot, w0, w1, r0, r1 = p
-        print(f"{seg[:20]:20s} {w0*100:5.1f}%->{w1*100:5.1f}% {r0*100:6.1f}%->{r1*100:6.1f}% {mix:+8.2f} {rate:+8.2f} {inter:+8.2f} {tot:+8.2f}")
+        print(f"{seg[:20]:20s} {w0*100:5.1f}%->{w1*100:5.1f}% {fmt_r(r0)}->{fmt_r(r1)} {mix:+8.2f} {rate:+8.2f} {inter:+8.2f} {tot:+8.2f}")
     ok = abs(total - delta) < 1e-6 * max(1.0, abs(delta))
     print(f"\nparts: {total:+.2f}  change: {delta:+.2f}  {'add up' if ok else 'DO NOT ADD UP'}")
     big = max(parts, key=lambda p: abs(p[4]))
@@ -91,7 +92,7 @@ def total_split(rows):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("segments")
-    ap.add_argument("--unit", choices=["pts", "abs"], default="pts", help="rate mode: percentage points (default) or absolute fraction")
+    ap.add_argument("--unit", choices=["pts", "abs"], default="pts", help="rate mode: pts prints shares as percentages and effects in points (default); abs for a ratio such as lines per file")
     a = ap.parse_args()
     with open(a.segments, newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
