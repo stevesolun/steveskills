@@ -1,3 +1,0 @@
-interface:
-  display_name: "With Receipts"
-  short_description: "Every number from data with its receipt: source, freshness, query, cross-check, reviewer"

@@ -1,5 +1,7 @@
 # answer-key
 
+> **Archived.** Removed in 1.8.0. In four blind repetitions against a baseline skill set it won once: the skill arm ran all eight standard questions every time and kept a rerunnable key with a log, but on the plain ask its report summarised the unchanged questions instead of listing expected against actual for each, the same shape as the baseline's report. Nothing replaces it. The page below is as it was.
+
 An agent skill that keeps a file of data questions with known answers, runs it against the database or warehouse on every change to the data model, the metric definitions or the analysis skill, logs every run, and gates on the pass rate. By Steve Solun. MIT.
 
 ## What it does
@@ -77,11 +79,7 @@ Periodic maintenance and a gate for the data role: it runs on every change and b
 
 ## Install
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=answer-key
-```
-
-Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
+Not installable since 1.8.0; the folder holds this page only.
 
 ## Files
 

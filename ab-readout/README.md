@@ -14,7 +14,6 @@ Type `/ab-readout`, or the agent reaches for it on its own when a task fits: bei
 | --- | --- |
 | Two randomly assigned arms, four counts, and a launch decision resting on them | this skill |
 | A metric moved between two periods or segments with no random assignment | [driver-split](../driver-split) |
-| The counts themselves are going to a stakeholder and need their provenance | [with-receipts](../with-receipts) |
 
 An observational comparison with no randomised assignment has no split to check and no lift to trust.
 
@@ -84,9 +83,22 @@ verdict: SRM FAIL
 
 Exit code 1. The p-value for the underpowered case matches SciPy's pooled two-proportion test to four decimals (0.4121); the script itself needs nothing beyond the standard library.
 
+### A/B against a baseline skill set
+
+Four blind repetitions, each a fresh headless session: arm A had a baseline skill set, arm B the same set plus this skill. The task was two experiments to write up: one with a sample ratio mismatch (9,000 against 10,000 users on a planned 50/50 split), one not significant and underpowered for its planned effect (6.0% against 6.6%, p = 0.43, 2.1 points detectable, about 9,500 users per arm needed). Two repetitions asked for the split check, the intervals, the smallest detectable effect and one recommendation; two asked for a write-up and what to do. Pre-registered: SRM, the broken split named and that experiment not recommended for shipping; UNDER, the second experiment called underpowered with the sample needed and no "no effect"; CI, an interval for its lift. Win: all three with the skill, a miss without.
+
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep1 | instruction in prompt | SRM=yes, UNDER=yes, CI=no | SRM=yes, UNDER=yes, CI=yes | B | A 3/4, B 3/4 |
+| rep2 | instruction in prompt | SRM=yes, UNDER=yes, CI=no | SRM=yes, UNDER=yes, CI=yes | B | A 3/4, B 3/4 |
+| rep3 | plain ask | SRM=yes, UNDER=yes, CI=yes | SRM=yes, UNDER=yes, CI=yes | none | A 1/4, B 3/4 |
+| rep4 | plain ask | SRM=yes, UNDER=no, CI=yes | SRM=yes, UNDER=yes, CI=yes | B | A 0/4, B 3/4 |
+
+Three of four: passed. The baseline found the broken split every time; it printed no interval for the lift in two repetitions and, on one plain ask, called the second experiment's result final without saying it could not have seen the planned effect. The skill arm's write-ups quoted the script's verdict line each time. The blind grader scored the skill arm 3/4 in all four and the baseline 3, 3, 1 and 0.
+
 ## Where it fits
 
-A reach-for-it-anytime standalone for the data role, at the moment an experiment turns into a decision. Its neighbours are [driver-split](../driver-split), because a move with no random assignment is explained by parts rather than tested for a lift, and [with-receipts](../with-receipts), because the four counts are numbers from data and the readout is only as good as their source and query. The index of every skill is the [root README](../README.md#skills).
+A reach-for-it-anytime standalone for the data role, at the moment an experiment turns into a decision. Its neighbour is [driver-split](../driver-split), because a move with no random assignment is explained by parts rather than tested for a lift. The index of every skill is the [root README](../README.md#skills).
 
 ## Install
 

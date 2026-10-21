@@ -14,7 +14,6 @@ Type `/tool-diet`, or the agent reaches for it on its own when a task fits: a to
 | --- | --- |
 | Results come back bigger than the task used, or the same result comes back twice | this skill |
 | A structural fact is re-learned every session (which file is canonical, what imports what) | [structure-map](../structure-map) |
-| The session is expensive because the task itself was asked shallowly | [deeper](../deeper) |
 
 A session that used what it fetched has no fat to cut; the skill ends with the measurement.
 
@@ -71,9 +70,22 @@ By tool
 
 The two biggest results here are the agent reading back outputs the harness had already cut and saved: the same text, paid for twice, about 16,000 tokens. The cut is in the first command (fewer files per loop, or a search instead of a dump).
 
+### A/B against a baseline skill set
+
+Four blind repetitions, each a fresh headless session: arm A had a baseline skill set, arm B the same set plus this skill. Phase 1: in a clone of vuejs/vue, answer four weekly questions whose naive lookups are large (a year of `git log`, a `git log -p` on one file, a `wc -l` over every TypeScript file) and make next week's session cheaper; two repetitions asked for the fat found and before and after per lookup, two asked only to make it cheaper. Phase 2, the measurement: a fresh session with no skills, in each arm's final tree, answered the same four questions, and the screener summed the bytes of every tool result that session received. Pre-registered: PROBE, the skill arm's next session paid at most 0.7 of the baseline's; CUT, the skill arm's report carries before and after figures. Win: both.
+
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep1 | instruction in prompt | probe_bytes=8129, CUT=yes | probe_bytes=1693, CUT=yes | B | A 2/4, B 4/4 |
+| rep2 | instruction in prompt | probe_bytes=9806, CUT=no | probe_bytes=2657, CUT=yes | B | A 2/4, B 3/4 |
+| rep3 | plain ask | probe_bytes=14708, CUT=no | probe_bytes=3551, CUT=yes | B | A 1/4, B 4/4 |
+| rep4 | plain ask | probe_bytes=14882, CUT=no | probe_bytes=1999, CUT=yes | B | A 0/4, B 2/4 |
+
+Four of four: passed. The next session's lookups cost 4 to 7 times fewer bytes in the skill arm's tree (a wrapper script with `--help` and one line in the agent instructions, found by a session that knew nothing of the first), and the baseline arm reported no before and after figures in three repetitions. The blind grader put the skill arm at 4, 3, 4 and 2 of 4 and the baseline at 2, 2, 1 and 0.
+
 ## Where it fits
 
-Periodic maintenance for any session that leans on tools, and a reach-for-it-anytime standalone when one result is obviously the problem. Its neighbours are [structure-map](../structure-map), because a lookup rebuilt in every session is sometimes a fact that belongs in the map rather than a wrapper script, and [deeper](../deeper), because a prompt that asks for summaries instead of raw material produces a different kind of waste. The index of every skill is the [root README](../README.md#skills).
+Periodic maintenance for any session that leans on tools, and a reach-for-it-anytime standalone when one result is obviously the problem. Its neighbour is [structure-map](../structure-map), because a lookup rebuilt in every session is sometimes a fact that belongs in the map rather than a wrapper script. The index of every skill is the [root README](../README.md#skills).
 
 ## Install
 

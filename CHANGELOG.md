@@ -1,5 +1,15 @@
 # steveskills
 
+## 1.8.0
+
+### Minor Changes
+
+- Every remaining skill has now been through the benchmark. Screened this release, four repetitions each, two designs, pre-registered: **`tool-diet`** passed 4 of 4 (a fresh session's lookups cost 4 to 7 times fewer bytes in its tree), **`clean-log`** 3 of 4, **`driver-split`** 3 of 4, **`ab-readout`** 3 of 4, and **`whose-red`**, re-screened on four planted failures of four kinds, 3 of 4 (two earlier repetitions void: the baseline arm installed the missing module into the shared environment; the planted module is now one pip cannot install). Each README carries its table under "It's working if".
+- Remove **`deeper`**: four ties of four. The baseline tested the question's false premise, worked from the raw history and anchored on the repository's own dates every time. Its page stays, archived.
+- Remove **`with-receipts`**: two wins (the plain asks, where the baseline gave numbers with no query and no second route) and two ties when the prompt asked for the receipt; under the bar. Its page stays, archived.
+- Remove **`answer-key`**: one win of four. The skill arm ran every standard question and kept a rerunnable key, but its report summarised the unchanged questions instead of listing expected against actual for each. Its page stays, archived.
+- The plugin ships twelve skills.
+
 ## 1.7.0
 
 ### Minor Changes

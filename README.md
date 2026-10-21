@@ -19,9 +19,9 @@ Each skill started from a failure seen in a real session, and each one ends in a
 | The failure | The skills |
 | --- | --- |
 | **The agent grades its own work.** "Tests pass", "done", "the criteria are met": claims with no run behind them. | [acceptance-probes](./acceptance-probes), [red-at-base](./red-at-base), [whose-red](./whose-red), [reconcile](./reconcile) |
-| **A number arrives without its receipt.** A figure nobody can rerun, a move explained by a guess, an analytics agent that drifted since it was last checked. | [with-receipts](./with-receipts), [driver-split](./driver-split), [answer-key](./answer-key), [clean-log](./clean-log), [ab-readout](./ab-readout) |
+| **A number arrives without its receipt.** A move explained by a guess, a cleaned file described from memory, an experiment read in the wrong order. | [driver-split](./driver-split), [clean-log](./clean-log), [ab-readout](./ab-readout) |
 | **The write-up drifts from its sources.** A summary with a remembered figure, a proposal thin on the criterion that scores. | [number-trace](./number-trace), [criteria-map](./criteria-map) |
-| **The session pays for what it does not use.** Fat tool results, a repository re-learned every morning, decisions lost between phases, a task done bigger instead of deeper. | [tool-diet](./tool-diet), [structure-map](./structure-map), [decision-ledger](./decision-ledger), [deeper](./deeper) |
+| **The session pays for what it does not use.** Fat tool results, a repository re-learned every morning, decisions lost between phases. | [tool-diet](./tool-diet), [structure-map](./structure-map), [decision-ledger](./decision-ledger) |
 
 ## Skills
 
@@ -32,7 +32,6 @@ Every skill is model-invoked: the agent reaches for it when a task matches its d
 | Skill | What it does |
 | --- | --- |
 | [tool-diet](./tool-diet) | Puts tool results on a diet. Measures which tool, CLI, script or MCP results in a session cost the most tokens for the least use, cuts the fat at its source, and proves the saving with before and after numbers. |
-| [deeper](./deeper) | Rewrites a task for expert depth, not size. Names the raw inputs, instruments and outside check a top practitioner would use, rewrites the prompt to ask for exactly that, counts the depth markers before and after, and runs it against that check. |
 | [acceptance-probes](./acceptance-probes) | Turns a ticket's acceptance criteria into runnable probes before any implementation, proves each probe fails at the start commit, freezes the probes, and reruns them to accept the work as a count. |
 | [reconcile](./reconcile) | Closes a session by reconciling git, the tracker and the transcript's own claims into a discrepancy table, acting only on what you confirm, and ending with the next piece of work. |
 | [decision-ledger](./decision-ledger) | Keeps an append-only ledger of settled decisions with their source and audits each spec, ticket set or PR against it before publishing, so no decision is lost between phases and none is re-asked. |
@@ -44,9 +43,7 @@ Every skill is model-invoked: the agent reaches for it when a task matches its d
 
 | Skill | What it does |
 | --- | --- |
-| [with-receipts](./with-receipts) | Delivers a number from data with its receipt: the question as resolved, the source and its freshness from the data, the query as it ran, a second route to the same number with the delta, and a reviewer who did not write the query. |
 | [driver-split](./driver-split) | Answers why a number moved with named parts that add up to the change: per segment, mix effect and rate effect, ranked by size, residual sized. |
-| [answer-key](./answer-key) | Keeps a file of data questions with known answers, runs it on every change to the data model, definitions or analysis skill, logs each run with its git SHA, and gates on the pass rate. |
 | [clean-log](./clean-log) | Cleans a data file by script and ships it with a change log computed from the two files: rows, columns, and per-column cell changes by kind, with checksums. |
 | [ab-readout](./ab-readout) | Writes up an A/B test from its counts in the only safe order: sample ratio mismatch, rates with intervals, lift with its interval and p-value, detectable effect, then one verdict line. |
 
@@ -77,12 +74,18 @@ Every skill is screened the same way before it stays in the index:
 | structure-map | 1 repetition, proofs rerun independently | passed |
 | criteria-map | 4 repetitions, two designs | passed, 3 of 4 |
 | number-trace | 4 repetitions, two designs, rerun under the corrected unit rule | passed, 3 of 4 |
-| whose-red | 1 repetition; the pre-registered metric could not separate the arms | re-screening pending |
-| tool-diet, deeper, with-receipts, driver-split, answer-key, clean-log, ab-readout | not yet screened | pending; each is removed if it fails |
+| whose-red | re-screened: 4 counting repetitions, two designs, four planted failures of four kinds (two earlier repetitions void: the baseline arm installed the missing module into the shared environment) | passed, 3 of 4 |
+| tool-diet | 4 repetitions, two designs, measured on a fresh session's tool-result bytes in each arm's tree | passed, 4 of 4 |
+| clean-log | 4 repetitions, two designs, change log recomputed by the screener | passed, 3 of 4 |
+| driver-split | 4 repetitions, two designs, parts that add up | passed, 3 of 4 |
+| ab-readout | 4 repetitions, two designs, a planted split mismatch and an underpowered test | passed, 3 of 4 |
+| with-receipts | 4 repetitions, two designs, two ties when the prompt asked for the receipt | removed in 1.8.0 ([page](./with-receipts)) |
+| answer-key | 4 repetitions, two designs, one win | removed in 1.8.0 ([page](./answer-key)) |
+| deeper | 4 repetitions, two designs, four ties | removed in 1.8.0 ([page](./deeper)) |
 | source-bound | 4 repetitions, two designs, four ties | removed in 1.7.0 ([page](./source-bound)) |
 | cite-or-cut | 4 repetitions, two designs, no win | removed in 1.7.0 ([page](./cite-or-cut)) |
 
-The engineering rows were screened with one repetition each before the four-repetition bar existed; they are rerun under it next, after the pending rows.
+The first five engineering rows were screened with one repetition each before the four-repetition bar existed; they are rerun under it next.
 
 ## Install
 
@@ -142,16 +145,13 @@ Prompts that make the agent reach for each skill without being told, and what co
 | Skill | Say something like | What comes back |
 | --- | --- | --- |
 | tool-diet | "Why did this session burn 300K tokens? Find the waste and fix it." / "That MCP server keeps returning huge payloads. Put it on a diet." | A table: the call, the kind of fat, the cut, tokens before → after, and the share of the session's tool tokens recovered. Durable cuts land in the repo. |
-| deeper | "/deeper find out why checkout conversion dropped last month" / "Give me the expert version of this task, not a longer one." | The expert gap, raw inputs, instruments and outside proof; a rewritten prompt; depth markers before → after; then the run, reported against the outside check first. `--full` adds the outcome and other fields, `--run` skips the stop. |
 | acceptance-probes | "Implement ticket 14 and prove the acceptance criteria." / "Were the criteria on this ticket really met?" | `probes.sh`, one function per criterion, red at the start commit; after the work, `start: K of K FAIL, end: K of K PASS`, with criteria that were already true flagged and `HUMAN` ones left unticked. |
 | reconcile | "We're done for today, close out the session." / "Wrap up: what's left on this branch?" | The raw `## git` and `## tracker` blocks, a table of discrepancies between git, tracker and the transcript's claims, nothing acted on until you confirm, and a last line `next: <work> (<skill>)`. |
 | decision-ledger | "Write the spec from our interview." / "Publish the tickets; make sure nothing we decided got lost." | `.scratch/<effort>/ledger.md` with one line per settled decision and its source, and `honoured H of L live, missing M` with a file and line per hit before anything is published. |
 | red-at-base | "Add tests for this change and tell me which ones would fail without it." / "Would these tests have caught the old behaviour?" | `N of M new or changed tests fail at base (<sha>): R red, E error, G green` with the ID list from a rerun in a throwaway worktree; a green test is changed or deleted, never explained. |
 | whose-red | "The suite is red, is that me?" / "Can I skip this failing test, it looks unrelated." | One row per failing test: `mine`, `pre-existing`, `flaky` or `environment`, with the base run and repeat counts behind it, and `failing N: mine a, pre-existing b, flaky c, environment d`. |
 | structure-map | "Write down how this repo is laid out for the next session." / "Refresh the structure map." | `docs/STRUCTURE.md` under 60 lines, each entry `fact | proof: <command> | expect: <output>`, and `confirmed C, stale S` from running every proof before the map is committed. |
-| with-receipts | "How many active customers did we have last month?" / "Put the weekly metrics in a report I can send to the board." | The number with a `receipt:` block: question as resolved, source, freshness (newest date in the data), the query, the cross-check route, the delta, the reviewer; `receipts.py footer` exits 0 only when all seven are there. |
 | driver-split | "Why is gross margin down in EMEA this quarter?" / "How much of the drop is the UK versus everything else?" | A table of parts that add up to the change: per segment, mix effect, rate effect and interaction in points, ranked, the largest driver named, the residual sized. |
-| answer-key | "We changed the revenue definition; is the analytics agent still right?" / "Can we launch the finance domain to stakeholders?" | `P of N pass (rate)` per run, one row per question with expected and actual, a log row with git SHA and label, exit 1 under the gate. |
 | clean-log | "Clean this export and tell me everything you changed." | The cleaning as a script with dropped rows in a side file, and a log computed from the two files: rows by key, columns, cells changed per column by kind with examples, both checksums. |
 | ab-readout | "Write up the checkout test and tell me whether to ship it." | SRM check, rate per arm with interval, lift with interval and p-value, smallest detectable effect and sample needed, then one verdict line that is the only recommendation. |
 | number-trace | "Help me understand this paper, with the key numbers quoted." / "Write up the analysis of this file using only numbers you computed." | One row per number in the summary: the source line it matched, `labelled` for a figure the summary marks as computed or assumed, or NOT FOUND; `numbers: N in doc, F found, L labelled, M not found`, exit 1 while any is unfound. |
@@ -167,7 +167,7 @@ CHANGELOG.md           # one entry per release
 <skill>/
 ├── README.md          # the docs page: what it does, when to reach for it, common questions, it's working if
 ├── SKILL.md           # the skill itself (frontmatter + instructions)
-├── <REFERENCE>.md     # reference a branch of the skill loads on demand, where a skill has one (deeper/FULL.md)
+├── <REFERENCE>.md     # reference a branch of the skill loads on demand, where a skill has one
 ├── agents/openai.yaml # Codex and ChatGPT picker metadata
 └── scripts/           # the one script that prints the number behind the claim
 ```

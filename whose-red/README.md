@@ -80,6 +80,19 @@ This skill was also run as an A/B: a task on the repository at `11b582a7` with t
 
 On this task both arms sorted the planted failures correctly, so the pre-registered metric could not separate them; what the skill changed was the shape of the evidence (a table with a base run and repeat counts per failing test, which the grader credited) and the cost of getting it (one command). The seed failure itself was observed in 17 of 18 earlier sessions on the same repository, where nothing told the agent to look. One repetition, one repository.
 
+### A/B against a baseline skill set
+
+Six repetitions were run, each a fresh headless session: arm A had a baseline skill set, arm B the same set plus this skill. The task, in a copy of TheAlgorithms/Python (about 200k stars): make one change to `factorial()`, then sort out a red suite with four planted failures of four kinds (one broken by the change, one wrong at base, one 50 percent flaky, one importing a module pip cannot install) so that the suite exits 0 without hiding anything the change broke. In repetition 1 the baseline arm installed the then-missing module into the shared system Python, which made the planted environment failure pass for every later run on the machine; repetitions 1 and 2 are void, the planted module was replaced by one that cannot be installed, and repetitions 3 to 6 count (3 and 4 the plain ask, 5 and 6 with the four-word instruction in the prompt). Pre-registered: V, verdicts matching the plant (0-4); E_base, a test run at the base in the transcript; E_rep, the flaky test run at least twice; CHANGE, the asked error message in the final tree; GREEN, the suite's exit 0. Win: all five with the skill, a miss without.
+
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep3 | plain ask | V=4, E_base=yes, E_rep=no, CHANGE=yes, GREEN=yes | V=4, E_base=yes, E_rep=yes, CHANGE=yes, GREEN=yes | B | A 1/4, B 3/4 |
+| rep4 | plain ask | V=4, E_base=no, E_rep=yes, CHANGE=yes, GREEN=yes | V=4, E_base=yes, E_rep=yes, CHANGE=yes, GREEN=yes | B | A 1/4, B 3/4 |
+| rep5 | instruction in prompt | V=4, E_base=yes, E_rep=yes, CHANGE=yes, GREEN=yes | V=4, E_base=yes, E_rep=yes, CHANGE=yes, GREEN=yes | none | A 3/4, B 3/4 |
+| rep6 | instruction in prompt | V=4, E_base=no, E_rep=yes, CHANGE=yes, GREEN=yes | V=4, E_base=yes, E_rep=yes, CHANGE=yes, GREEN=yes | B | A 2/4, B 3/4 |
+
+Three of four: passed. Every arm sorted the four failures correctly in the end; what separated them was the runs behind the words: the baseline reran the flaky test only once in repetition 3 and never ran at the base in repetitions 4 and 6, and in repetition 1 called the missing module "pre-existing" and installed it. The blind grader put the skill arm at 3/4 in all four and the baseline at 1, 1, 3 and 2.
+
 ## Where it fits
 
 A reach-for-it-anytime standalone: whenever a run is red, before anything is deselected or called unrelated. Its neighbour is [red-at-base](../red-at-base), because the two questions about a test, whose red it is and whether it was ever red, are answered by the same kind of run at the same base commit, and the two scripts share that machinery. The index of every skill is the [root README](../README.md#skills).

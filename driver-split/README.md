@@ -13,7 +13,6 @@ Type `/driver-split`, or the agent reaches for it on its own when a task fits: b
 | Situation | Reach for |
 | --- | --- |
 | A number moved between two points and someone wants the reasons, sized | this skill |
-| The number itself needs its provenance before anyone asks why | [with-receipts](../with-receipts) |
 | Two arms were randomly assigned and the question is whether the difference is real | [ab-readout](../ab-readout) |
 
 A number with no before and after has nothing to split.
@@ -93,9 +92,22 @@ largest driver: server (-2631); the overall change is only -1757 because other p
 
 The net change is small and misleading on its own: server rendering and Weex left the tree, the Vue 3 compatibility layer and the type definitions arrived, and the script reports the offsetting parts instead of the net.
 
+### A/B against a baseline skill set
+
+Four blind repetitions, each a fresh headless session: arm A had a baseline skill set, arm B the same set plus this skill. The task was the vuejs/vue commit log and the question why files touched per commit fell from 2021 to 2022, split by contributor type (Evan You, bots, everyone else): a move of 0.28 that hides large offsetting parts (Evan You's share of commits 7% to 80%, bots 36% to 2%, others' commits 13.1 to 7.6 files). Two repetitions asked for parts that add up with share and size per type, two asked why. Pre-registered: TOTAL, the overall before and after; MIX, commit shares for two or more types; RATE, within-type files per commit for two or more types; ADD, per-type contributions that sum to the change. Win: all four with the skill, a miss without.
+
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep1 | instruction in prompt | TOTAL=no, MIX=yes, RATE=yes, ADD=no | TOTAL=yes, MIX=yes, RATE=yes, ADD=yes | B | A 3/4, B 4/4 |
+| rep2 | instruction in prompt | TOTAL=yes, MIX=yes, RATE=yes, ADD=no | TOTAL=yes, MIX=yes, RATE=yes, ADD=yes | B | A 3/4, B 4/4 |
+| rep3 | plain ask | TOTAL=yes, MIX=yes, RATE=yes, ADD=no | TOTAL=yes, MIX=yes, RATE=yes, ADD=yes | B | A 0/4, B 4/4 |
+| rep4 | plain ask | TOTAL=yes, MIX=yes, RATE=yes, ADD=no | TOTAL=no, MIX=yes, RATE=yes, ADD=no | none | A 0/4, B 4/4 |
+
+Three of four: passed. The baseline knew the shares and the rates every time and never produced parts that add up to the change; the skill arm did in three, and in repetition 4 its answer carried neither the overall line nor a sum. The blind grader put the skill arm at 4/4 in all four and the baseline at 3, 3, 0 and 0.
+
 ## Where it fits
 
-A reach-for-it-anytime standalone for the data role, usually the second question after a number has landed. Its neighbours are [with-receipts](../with-receipts), because the before and after values are themselves numbers that need a source and a query before they are split, and [ab-readout](../ab-readout), because a move between two randomly assigned arms is a different question with its own intervals. The index of every skill is the [root README](../README.md#skills).
+A reach-for-it-anytime standalone for the data role, usually the second question after a number has landed. Its neighbours are [ab-readout](../ab-readout), because a move between two randomly assigned arms is a different question with its own intervals, and [clean-log](../clean-log), because the segment file is only as clean as the export it came from. The index of every skill is the [root README](../README.md#skills).
 
 ## Install
 

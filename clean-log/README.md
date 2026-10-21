@@ -13,8 +13,6 @@ Type `/clean-log`, or the agent reaches for it on its own when a task fits: bein
 | Situation | Reach for |
 | --- | --- |
 | A data file is being cleaned and the recipient needs to know every change | this skill |
-| A number from the data is leaving the session and needs its provenance | [with-receipts](../with-receipts) |
-| The cleaned file feeds questions whose answers must stay right afterwards | [answer-key](../answer-key) |
 
 Transforming data into a different shape is a pipeline, and its log is a diff of outputs.
 
@@ -76,9 +74,22 @@ change log: rows 3593->3593, columns 4->4, cells changed 107
 
 Every line maps to a rule: the 61 email changes are rule two, the 46 author changes are rule three, and the trim rule changed nothing, which the log states by omission rather than the write-up claiming otherwise. The log also surfaces a rule choice to revisit: "most frequent name" turned a real name into a handle for one contributor, which is exactly the kind of change a narrated log would have described as "normalised author names" and moved on.
 
+### A/B against a baseline skill set
+
+Four blind repetitions, each a fresh headless session: arm A had a baseline skill set, arm B the same set plus this skill. The task was the vuejs/vue commit log (3,593 rows) damaged in known ways (80 padded names, 60 upper-cased emails, 80 non-ISO dates in two formats, 20 blank names, 15 lower-cased names, 15 duplicate rows), to be cleaned with a description of every change; two repetitions asked for a count per kind per column, two asked what changed. The screener computed the change log itself from the dirty and the cleaned file and checked that the description states each count it found. Pre-registered: X, computed counts the description does not state; D, the rows-removed count stated. Win: X = 0 and D with the skill, a miss without.
+
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep1 | instruction in prompt | X=yes, D=yes | X=no, D=yes | B | A 4/4, B 4/4 |
+| rep2 | instruction in prompt | X=yes, D=yes | X=no, D=yes | B | A 4/4, B 4/4 |
+| rep3 | plain ask | X=no, D=yes | X=no, D=yes | none | A 4/4, B 4/4 |
+| rep4 | plain ask | X=yes, D=yes | X=no, D=yes | B | A 3/4, B 4/4 |
+
+Three of four: passed. The baseline cleaned the file correctly every time and dropped one count in three repetitions, the 80 date reformats, which is what a log computed from the two files cannot do. The blind grader scored both arms 4/4 three times and the baseline 3/4 once.
+
 ## Where it fits
 
-A reach-for-it-anytime standalone for the data role, at the moment a file changes hands. Its neighbours are [with-receipts](../with-receipts), because the first number computed from the cleaned file needs a source line that names which file, with which checksum, and [answer-key](../answer-key), because a cleaned file replacing a raw one is a change the key should run against. The index of every skill is the [root README](../README.md#skills).
+A reach-for-it-anytime standalone for the data role, at the moment a file changes hands. Its neighbours are [driver-split](../driver-split), because a split is only as good as the segment file it reads, and [ab-readout](../ab-readout), because the four counts of an experiment come out of an export like this one. The index of every skill is the [root README](../README.md#skills).
 
 ## Install
 

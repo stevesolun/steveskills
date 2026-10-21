@@ -1,5 +1,7 @@
 # deeper
 
+> **Archived.** Removed in 1.8.0. In four blind repetitions against a baseline skill set (two with "the expert version, not a longer one" in the prompt, two with the plain question) the baseline tested the question's false premise, worked from the raw history and anchored its answer on the repository's own dates every time, so the skill never beat it on the pre-registered counts. Nothing replaces it. The page below is as it was.
+
 An agent skill that rewrites a task for expert depth, not size: before the work starts it names what a top practitioner would do that was not asked, the rawest material they would start from, the instruments they would use and the outside check that proves the result, rewrites the prompt to ask for exactly that, measures the rewrite, and runs it against that check. By Steve Solun. MIT.
 
 ## What it does
@@ -81,11 +83,7 @@ A chain step at the very start of a task, before any work runs. Its neighbours a
 
 ## Install
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=deeper
-```
-
-Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
+Not installable since 1.8.0; the folder holds this page only.
 
 ## Files
 

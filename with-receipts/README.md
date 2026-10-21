@@ -1,5 +1,7 @@
 # with-receipts
 
+> **Archived.** Removed in 1.8.0. In four blind repetitions against a baseline skill set it won the two plain asks (the baseline gave the numbers with no query and no second route) and tied the two where the prompt asked for the receipt; two of four is under the bar. Nothing replaces it; [driver-split](../driver-split) and [ab-readout](../ab-readout) carry their own provenance lines. The page below is as it was.
+
 An agent skill that delivers a number from data with its receipt: the question as resolved, the source and its freshness taken from the data, the query as it ran, a second route to the same number with the delta, and a reviewer who did not write the query. One script checks the receipt. By Steve Solun. MIT.
 
 ## What it does
@@ -108,11 +110,7 @@ A reach-for-it-anytime standalone for the data role, and the one the other data 
 
 ## Install
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=with-receipts
-```
-
-Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
+Not installable since 1.8.0; the folder holds this page only.
 
 ## Files
 
