@@ -1,3 +1,0 @@
-interface:
-  display_name: "Reconcile"
-  short_description: "Close a session: git, tracker, transcript, reconciled"

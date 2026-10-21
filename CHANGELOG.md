@@ -1,5 +1,14 @@
 # steveskills
 
+## 1.9.0
+
+### Minor Changes
+
+- The five engineering skills screened with one repetition in the first rounds were rerun at the four-repetition bar on TheAlgorithms/Python, with every sample run on their pages retaken there. **`red-at-base`** passed 4 of 4 (the baseline added a green-at-base boundary test every time), **`structure-map`** 4 of 4 (every entry of the skill arm's maps reproduced under the screener; the baseline's reproduced 0 to 17 of 15 to 33), **`acceptance-probes`** 3 of 4 (the baseline ticked the planted already-true criterion in three runs).
+- Remove **`reconcile`** and **`decision-ledger`**: two wins of four each, on the plain asks only. When the prompt spelled the behaviour out (compare git with the claims and act on nothing; let nothing decided be lost) the baseline matched them. Their pages stay, archived, with the final runs.
+- `deeper` was retested on a task where the shipped instrument misleads: one win, one tie, two runs in which the skill arm spent the hour without an answer. It stays archived.
+- The plugin ships ten skills.
+
 ## 1.8.0
 
 ### Minor Changes

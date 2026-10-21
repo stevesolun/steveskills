@@ -14,7 +14,6 @@ Type `/acceptance-probes`, or the agent reaches for it on its own when a task fi
 | --- | --- |
 | A ticket's criteria need to be proven, before and after the work | this skill |
 | The tests a change added need to be shown red before the change | [red-at-base](../red-at-base) |
-| Decisions from an interview need to survive into the spec and tickets | [decision-ledger](../decision-ledger) |
 
 A change with no ticket and no criteria has nothing to probe; write the criteria first.
 
@@ -50,36 +49,45 @@ The checksum is printed at both ends for exactly this: a probe edited to pass is
 - The end line reads `K of K PASS`, both checksums match, and `HUMAN` criteria are listed unticked.
 - A criterion that was already true is named as grading nothing, not ticked as delivered.
 
-From the A/B that ranked this skill: the same ticket (four criteria, one of them planted so that it was already true before any work) implemented twice in fresh sessions on [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7`, once with a baseline skill set and once with the same set plus this skill.
+A real run on TheAlgorithms/Python: ticket 41 asks for `collatz_steps()` with four acceptance criteria, the fourth of which (the existing `collatz_sequence` doctests still pass) is true before any work. The probes written from the ticket, run at the start commit and again at the end:
 
 ```text
-start run (bd7aee35, probes fb580c1dd1ae):
+$ probes-run.sh .scratch/41/probes.sh a10eb811
+start run (a10eb811, probes 4d3bd0ef3a20):
   C1 FAIL
-  C2 PASS
+  C2 FAIL
   C3 FAIL
   C4 PASS
-end run (f949746f, probes fb580c1dd1ae):
+end run (3348e313, probes 4d3bd0ef3a20):
   C1 PASS
   C2 PASS
   C3 PASS
   C4 PASS
 
 acceptance: 4 criteria, 4 probed, 0 human
-start: 2 of 4 FAIL        end: 4 of 4 PASS
-already true at start (grades nothing): C2 C4
+start: 3 of 4 FAIL        end: 4 of 4 PASS
+already true at start (grades nothing): C4 
+exit=0
 ```
 
-| | baseline set | baseline set + acceptance-probes |
-| --- | --- | --- |
-| Planted already-true criterion | ticked as delivered | flagged, left unticked |
-| Real criterion checked red before the first implementation edit | no | yes |
-| Blind grader, skill's own success bullets | 0 of 5 | 4 of 5 |
+Exit code 0. C4 passes at the start and is reported as grading nothing, which is the ticket's own problem to fix; the three real criteria go from FAIL to PASS with the same probe bytes (the checksum is printed on both runs).
 
-The baseline arm ticked all four boxes, including the one that was true before it started. Both arms' checks fail at the start commit under an independent rerun. One repetition, one repository; the full A/B material (task, plant script, both arm prompts and reports, measurement script, grader transcript) is reproducible from the pinned commits.
+### A/B against a baseline skill set
+
+Four blind repetitions, each a fresh headless session: arm A had a baseline skill set, arm B the same set plus this skill, in a clone of [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) (about 200k stars). Two repetitions spelled the behaviour out in the prompt, two asked plainly. Pre-registered: FLAG, C4 reported as already true or left unticked; START, a check for C1 to C3 run before the module was first written; END, the screener's own checks pass on the final tree. Win: all three with the skill, a miss without.
+
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep1 | instruction in prompt | FLAG=no, START=yes, END=yes | FLAG=yes, START=yes, END=yes | B | A 0/4, B 4/4 |
+| rep2 | instruction in prompt | FLAG=yes, START=yes, END=yes | FLAG=yes, START=yes, END=yes | none | A 0/4, B 3/4 |
+| rep3 | plain ask | FLAG=no, START=no, END=yes | FLAG=yes, START=yes, END=yes | B | A 0/4, B 3/4 |
+| rep4 | plain ask | FLAG=no, START=no, END=yes | FLAG=yes, START=yes, END=yes | B | A 0/4, B 4/4 |
+
+Three of four: passed. The baseline ticked the already-true criterion as delivered in three repetitions and wrote the module before running any check in three; in repetition 2, told to show each check before and after, it did both. The skill arm wrote its probes from the ticket, ran them red at the start and green at the end, and left C4 unticked every time.
 
 ## Where it fits
 
-A chain step around implementation: ticket, probes, the build, probes again. Its neighbours are [red-at-base](../red-at-base), because probes grade the ticket and red-at-base grades the tests the change added, and the two compose, and [decision-ledger](../decision-ledger), because the criteria a ticket carries are often decisions settled earlier, and the ledger is where they are kept from drifting. The index of every skill is the [root README](../README.md#skills).
+A chain step around implementation: ticket, probes, the build, probes again. Its neighbours are [red-at-base](../red-at-base), because probes grade the ticket and red-at-base grades the tests the change added, and the two compose, and [whose-red](../whose-red), because a probe that fails at the end still has to be sorted into the change's own red and someone else's. The index of every skill is the [root README](../README.md#skills).
 
 ## Install
 

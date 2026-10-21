@@ -49,36 +49,26 @@ Because `flaky` is a claim about disagreement, and one run cannot disagree with 
 - The base worktree's `module <name> resolves to <path>` line points inside the worktree.
 - Every deselect in the change carries its row, and no row says `mine` in the final run.
 
-A real run on [stevesolun/ctx](https://github.com/stevesolun/ctx), in a scratch worktree built on `11b582a7`. The base for the run is a commit that quietly broke the parser's error path (a pre-existing failure); the working tree on top of it hides a subcommand from the help (which breaks a second test), adds a test whose outcome alternates between runs, and the machine lacks the Bubblewrap sandbox the live runner test needs.
+A real run on TheAlgorithms/Python, the suite the A/B below plants: one change to `factorial()` (the negative-input error now carries the value) and four planted failures of four kinds. The base is the commit before the change.
 
 ```text
-$ scripts/whose-red.py 45c05ff5 --paths src/tests/fit/test_cli_surface.py src/tests/fit/test_scan_cache.py \
-    "src/tests/fit/test_live_runner.py::test_one_environment_serves_the_whole_campaign_and_follows_each_workspace"
-suite run at the working tree: 4 failed, 11 passed in 13.95s
-base worktree 45c05ff5: module ctx resolves to /tmp/whose-red-t7bh1tg7/src/ctx/__init__.py
+$ whose-red.py HEAD~1 --paths maths/factorial.py maths/test_factorial.py maths/test_factorial_plant.py
+suite run at the working tree: 5 failed, 11 passed in 0.28s
+base worktree bd44e35a: module audio_filters resolves to /tmp/whose-red-6o7zqus_/audio_filters/__init__.py
 
 | verdict | test | head | base | note |
 | --- | --- | --- | --- | --- |
-| mine | src/tests/fit/test_cli_surface.py::test_help_advertises_only_the_product_surface | 3/3 fail | pass | passes at base, fails here |
-| pre-existing | src/tests/fit/test_cli_surface.py::test_unknown_command_error_does_not_leak_the_hidden_surface | 3/3 fail | fail | fails at base too |
-| flaky | src/tests/fit/test_scan_cache.py::test_scan_cache_is_warm_on_second_run | 1/3 fail | not run | outcomes P,F,P |
-| environment | src/tests/fit/test_live_runner.py::test_one_environment_serves_the_whole_campaign_and_follows_each_workspace | 3/3 fail | fail | sandbox: ...command could not be isolated: the Bubblewrap Linux sandbox is unavailable" is None |
+| mine | maths/factorial.py::maths.factorial.factorial | 3/3 fail | pass | passes at base, fails here |
+| mine | maths/test_factorial_plant.py::test_negative_error_message | 3/3 fail | pass | passes at base, fails here |
+| pre-existing | maths/test_factorial_plant.py::test_zero_is_zero | 3/3 fail | fail | fails at base too |
+| flaky | maths/test_factorial_plant.py::test_cache_warm_on_second_call | 2/3 fail | not run | outcomes P,F,F |
+| environment | maths/test_factorial_plant.py::test_vectorised_factorial | 3/3 fail | fail | missing module: ModuleNotFoundError: No module named 'vuejs_native_factorial' |
 
-failing 4: mine 1, pre-existing 1, flaky 1, environment 1
+failing 5: mine 2, pre-existing 1, flaky 1, environment 1
+exit=1
 ```
 
-Exit code 1, because of the `mine` row. The whole run took 57 seconds, most of it the sandbox test failing seven seconds at a time.
-
-This skill was also run as an A/B: a task on the repository at `11b582a7` with two failures planted before the work (a quietly broken parser test and the sandbox test that fails wherever the sandbox binary is missing), in two fresh sessions, once with a baseline skill set and once with the same set plus this skill.
-
-| | baseline set | baseline set + whose-red |
-| --- | --- | --- |
-| Failures left behind of the arm's own | 0 | 0 |
-| Tests deselected without a verdict row | 0 | 0 |
-| Verdict table with a run behind every row | no | yes |
-| Blind grader, skill's own success bullets | 1 of 5 | 4 of 5 |
-
-On this task both arms sorted the planted failures correctly, so the pre-registered metric could not separate them; what the skill changed was the shape of the evidence (a table with a base run and repeat counts per failing test, which the grader credited) and the cost of getting it (one command). The seed failure itself was observed in 17 of 18 earlier sessions on the same repository, where nothing told the agent to look. One repetition, one repository.
+Exit code 1, because of the `mine` rows: the change broke the module doctest and the planted message test, which is the change's own work to fix. The wrong-at-base test, the coin-flip test and the missing-module test each get the word their runs earned, with the runs beside it.
 
 ### A/B against a baseline skill set
 

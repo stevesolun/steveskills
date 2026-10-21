@@ -49,54 +49,56 @@ Red: the test ran at base and its assertion failed, which is the proof. Error: t
 - Above it, a `module <name> resolves to <path>` line whose path lies under the throwaway worktree, and `worktrees: N before, N after` with the same number twice.
 - The final run reads `0 green`, and the report says `sharpened` or `deleted` for every earlier green.
 
-A real run on [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7`, in a scratch worktree where `ctx fit --max-depth` was given a floor of 1 and three tests were added to `src/tests/fit/test_cli_surface.py`. One of them asserted that `--max-depth 1` is accepted, which was already true.
+Two real runs on TheAlgorithms/Python, same change (reject inputs above 1000 in `factorial()`), on the tests each arm of the A/B below wrote for it:
 
 ```text
-$ scripts/red-at-base.py 11b582a7
-base: 11b582a7  test files in diff: 1  (src/tests/fit/test_cli_surface.py)
+$ red-at-base.py 243b9375    # the baseline arm's tests
+base: 243b9375  test files in diff: 1  (maths/test_factorial.py)
 M = 3 (3 new, 0 changed)
-import path pinned: PYTHONPATH=/tmp/red-at-base-nhyb0b9n/src
-module ctx resolves to /tmp/red-at-base-nhyb0b9n/src/ctx/__init__.py
-runner at base: src/tests/fit/test_cli_surface.py: 2 failed, 1 passed in 2.04s
+import path pinned: PYTHONPATH=/tmp/red-at-base-albsqi2k
+module maths resolves to /tmp/red-at-base-albsqi2k/maths/__init__.py
+runner at base: maths/test_factorial.py: 2 failed, 1 passed in 0.22s
 
-2 of 3 new or changed tests fail at base (11b582a7): 2 red, 0 error, 1 green
-red:   src/tests/fit/test_cli_surface.py::test_max_depth_below_one_is_rejected[-1]
-red:   src/tests/fit/test_cli_surface.py::test_max_depth_below_one_is_rejected[0]
-green: src/tests/fit/test_cli_surface.py::test_max_depth_of_one_is_accepted
-worktrees: 16 before, 16 after
+2 of 3 new or changed tests fail at base (243b9375): 2 red, 0 error, 1 green
+red:   maths/test_factorial.py::test_argument_above_limit_raises[1001]
+red:   maths/test_factorial.py::test_argument_above_limit_raises[5000]
+green: maths/test_factorial.py::test_argument_at_limit_is_accepted
+worktrees: 1 before, 1 after
+exit=1
 ```
-
-Exit code 1. The green test was sharpened to also assert that the help text now documents the floor, which the old code did not print:
 
 ```text
-$ scripts/red-at-base.py 11b582a7
-base: 11b582a7  test files in diff: 1  (src/tests/fit/test_cli_surface.py)
-M = 3 (3 new, 0 changed)
-import path pinned: PYTHONPATH=/tmp/red-at-base-8gvin7__/src
-module ctx resolves to /tmp/red-at-base-8gvin7__/src/ctx/__init__.py
-runner at base: src/tests/fit/test_cli_surface.py: 3 failed in 2.02s
+$ red-at-base.py 243b9375    # the skill arm's tests
+base: 243b9375  test files in diff: 1  (maths/test_factorial.py)
+M = 5 (5 new, 0 changed)
+import path pinned: PYTHONPATH=/tmp/red-at-base-zi0u06e5
+module maths resolves to /tmp/red-at-base-zi0u06e5/maths/__init__.py
+runner at base: maths/test_factorial.py: 5 failed in 0.37s
 
-3 of 3 new or changed tests fail at base (11b582a7): 3 red, 0 error, 0 green
-red:   src/tests/fit/test_cli_surface.py::test_max_depth_below_one_is_rejected[-1]
-red:   src/tests/fit/test_cli_surface.py::test_max_depth_below_one_is_rejected[0]
-red:   src/tests/fit/test_cli_surface.py::test_max_depth_of_one_is_accepted_and_the_floor_is_documented
-worktrees: 16 before, 16 after
+5 of 5 new or changed tests fail at base (243b9375): 5 red, 0 error, 0 green
+red:   maths/test_factorial.py::test_factorial_limit_boundary
+red:   maths/test_factorial.py::test_factorial_rejects_any_argument_above_1000[1002]
+red:   maths/test_factorial.py::test_factorial_rejects_any_argument_above_1000[20000]
+red:   maths/test_factorial.py::test_factorial_rejects_any_argument_above_1000[5000]
+red:   maths/test_factorial.py::test_factorial_rejects_argument_above_1000
+worktrees: 1 before, 1 after
+exit=0
 ```
 
-Exit code 0. The `module ctx resolves to` line matters: this repository is installed in editable mode, so without the pinned import path the base worktree would have imported the current tree's package and graded the wrong code.
+The baseline's `test_argument_at_limit_is_accepted` asserts that `factorial(1000)` works, which was already true: green at base, so it proves nothing about the change and the first run exits 1. The skill arm's five tests are all red at base, exit 0.
 
-A first version of this skill, without the script, was run as an A/B on the same repository. The arm with the skill produced the right headline (`4 of 6 new tests fail at base`, matching an independent rerun) and then kept its two green-at-base tests as "boundary guards, on purpose". That is the failure this version closes: the script exits 1 while any test is green at base, and the only two moves the skill allows on a green are an edit and a deletion.
+### A/B against a baseline skill set
 
-This version was then run as its own A/B: the same task (give `ctx fit --max-depth` a floor of 1, add tests, report which tests would fail without the change) in two fresh sessions on the repository at `11b582a7`, once with a baseline skill set and once with the same set plus this skill.
+Four blind repetitions, each a fresh headless session: arm A had a baseline skill set, arm B the same set plus this skill, in a clone of [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) (about 200k stars). Two repetitions spelled the behaviour out in the prompt, two asked plainly. Pre-registered: the screener reruns each arm's new or changed test ids at the base commit in a fresh worktree with the arm's test files copied over it. M, new or changed ids; G, ids that pass at base; CHANGE, the asked behaviour on the final tree. Win: G = 0 with the skill, G >= 1 without.
 
-| | baseline set | baseline set + red-at-base |
-| --- | --- | --- |
-| New tests that pass at base, by independent rerun | 1 of 4 | 0 of 4 |
-| Green-at-base test kept and explained away | 1 | 0 |
-| Headline in the `N of M` shape, verdicts matching the rerun | no | yes, 4 of 4 |
-| Blind grader, skill's own success bullets | 0 of 5 | 4 of 5 |
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep1 | instruction in prompt | M=2, G=yes, CHANGE=yes | M=3, G=no, CHANGE=yes | B | A 0/4, B 4/4 |
+| rep2 | instruction in prompt | M=2, G=yes, CHANGE=yes | M=2, G=no, CHANGE=yes | B | A 0/4, B 4/4 |
+| rep3 | plain ask | M=2, G=yes, CHANGE=yes | M=yes, G=no, CHANGE=yes | B | A 0/4, B 4/4 |
+| rep4 | plain ask | M=2, G=yes, CHANGE=yes | M=2, G=no, CHANGE=yes | B | A 0/4, B 4/4 |
 
-One repetition, one repository; the full A/B material is reproducible from the pinned commit.
+Four of four: passed. In every repetition the baseline added a boundary test that the limit is still accepted, which passes without the change; the skill arm's tests were red at base every time, and its report carried the `N of M` headline from the rerun.
 
 ## Where it fits
 

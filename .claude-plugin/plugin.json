@@ -1,6 +1,6 @@
 {
   "name": "steveskills",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Steve Solun's agent skills: one folder per skill, each a SKILL.md plus the scripts it needs, with numbers behind every claim. Works in Claude Code, Codex, ChatGPT, Copilot and Cursor.",
   "author": {
     "name": "Steve Solun",
@@ -20,8 +20,6 @@
   "skills": [
     "./tool-diet",
     "./acceptance-probes",
-    "./reconcile",
-    "./decision-ledger",
     "./red-at-base",
     "./whose-red",
     "./structure-map",

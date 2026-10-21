@@ -18,10 +18,10 @@ Each skill started from a failure seen in a real session, and each one ends in a
 
 | The failure | The skills |
 | --- | --- |
-| **The agent grades its own work.** "Tests pass", "done", "the criteria are met": claims with no run behind them. | [acceptance-probes](./acceptance-probes), [red-at-base](./red-at-base), [whose-red](./whose-red), [reconcile](./reconcile) |
+| **The agent grades its own work.** "Tests pass", "done", "the criteria are met": claims with no run behind them. | [acceptance-probes](./acceptance-probes), [red-at-base](./red-at-base), [whose-red](./whose-red) |
 | **A number arrives without its receipt.** A move explained by a guess, a cleaned file described from memory, an experiment read in the wrong order. | [driver-split](./driver-split), [clean-log](./clean-log), [ab-readout](./ab-readout) |
 | **The write-up drifts from its sources.** A summary with a remembered figure, a proposal thin on the criterion that scores. | [number-trace](./number-trace), [criteria-map](./criteria-map) |
-| **The session pays for what it does not use.** Fat tool results, a repository re-learned every morning, decisions lost between phases. | [tool-diet](./tool-diet), [structure-map](./structure-map), [decision-ledger](./decision-ledger) |
+| **The session pays for what it does not use.** Fat tool results, a repository re-learned every morning. | [tool-diet](./tool-diet), [structure-map](./structure-map) |
 
 ## Skills
 
@@ -33,8 +33,6 @@ Every skill is model-invoked: the agent reaches for it when a task matches its d
 | --- | --- |
 | [tool-diet](./tool-diet) | Puts tool results on a diet. Measures which tool, CLI, script or MCP results in a session cost the most tokens for the least use, cuts the fat at its source, and proves the saving with before and after numbers. |
 | [acceptance-probes](./acceptance-probes) | Turns a ticket's acceptance criteria into runnable probes before any implementation, proves each probe fails at the start commit, freezes the probes, and reruns them to accept the work as a count. |
-| [reconcile](./reconcile) | Closes a session by reconciling git, the tracker and the transcript's own claims into a discrepancy table, acting only on what you confirm, and ending with the next piece of work. |
-| [decision-ledger](./decision-ledger) | Keeps an append-only ledger of settled decisions with their source and audits each spec, ticket set or PR against it before publishing, so no decision is lost between phases and none is re-asked. |
 | [red-at-base](./red-at-base) | Reruns every new or changed test at the base commit in a throwaway worktree and counts how many fail there, so a test that passes without the change is found and then changed or deleted rather than kept. |
 | [whose-red](./whose-red) | When a test fails, says whose red it is from runs rather than words: mine, pre-existing, flaky or environment, one table row per test with a base run and repeat counts behind it, before anything is deselected or called unrelated. |
 | [structure-map](./structure-map) | Writes or refreshes a repository structure map: the facts a fresh agent cannot recover from the file tree in under a minute, each paired with the command that proves it, checked by one script that reports confirmed and stale. |
@@ -67,11 +65,11 @@ Every skill is screened the same way before it stays in the index:
 
 | Skill | Screening | Result |
 | --- | --- | --- |
-| acceptance-probes | 1 repetition, planted already-true criterion | passed |
-| reconcile | 1 repetition, 4 planted discrepancies | passed |
-| decision-ledger | 1 repetition, 12 scripted decisions | passed |
-| red-at-base | 1 repetition, planted green-at-base test | passed |
-| structure-map | 1 repetition, proofs rerun independently | passed |
+| acceptance-probes | rerun at the four-repetition bar: a ticket with a planted already-true criterion | passed, 3 of 4 |
+| red-at-base | rerun at the four-repetition bar: a change plus tests, rerun at base by the screener | passed, 4 of 4 |
+| structure-map | rerun at the four-repetition bar: every proof rerun by the screener in a clean worktree | passed, 4 of 4 |
+| reconcile | rerun at the four-repetition bar: five planted disagreements, two ties when the prompt spelled the steps out | removed in 1.9.0 ([page](./reconcile)) |
+| decision-ledger | rerun at the four-repetition bar: twelve decisions, two ties when the prompt said nothing may be lost | removed in 1.9.0 ([page](./decision-ledger)) |
 | criteria-map | 4 repetitions, two designs | passed, 3 of 4 |
 | number-trace | 4 repetitions, two designs, rerun under the corrected unit rule | passed, 3 of 4 |
 | whose-red | re-screened: 4 counting repetitions, two designs, four planted failures of four kinds (two earlier repetitions void: the baseline arm installed the missing module into the shared environment) | passed, 3 of 4 |
@@ -81,11 +79,9 @@ Every skill is screened the same way before it stays in the index:
 | ab-readout | 4 repetitions, two designs, a planted split mismatch and an underpowered test | passed, 3 of 4 |
 | with-receipts | 4 repetitions, two designs, two ties when the prompt asked for the receipt | removed in 1.8.0 ([page](./with-receipts)) |
 | answer-key | 4 repetitions, two designs, one win | removed in 1.8.0 ([page](./answer-key)) |
-| deeper | 4 repetitions, two designs, four ties | removed in 1.8.0 ([page](./deeper)) |
+| deeper | 4 repetitions, two designs, four ties; retested on a task where the shipped benchmark misleads: one win, one tie, two runs that spent the hour without an answer | removed in 1.8.0, stays out ([page](./deeper)) |
 | source-bound | 4 repetitions, two designs, four ties | removed in 1.7.0 ([page](./source-bound)) |
 | cite-or-cut | 4 repetitions, two designs, no win | removed in 1.7.0 ([page](./cite-or-cut)) |
-
-The first five engineering rows were screened with one repetition each before the four-repetition bar existed; they are rerun under it next.
 
 ## Install
 
@@ -146,8 +142,6 @@ Prompts that make the agent reach for each skill without being told, and what co
 | --- | --- | --- |
 | tool-diet | "Why did this session burn 300K tokens? Find the waste and fix it." / "That MCP server keeps returning huge payloads. Put it on a diet." | A table: the call, the kind of fat, the cut, tokens before → after, and the share of the session's tool tokens recovered. Durable cuts land in the repo. |
 | acceptance-probes | "Implement ticket 14 and prove the acceptance criteria." / "Were the criteria on this ticket really met?" | `probes.sh`, one function per criterion, red at the start commit; after the work, `start: K of K FAIL, end: K of K PASS`, with criteria that were already true flagged and `HUMAN` ones left unticked. |
-| reconcile | "We're done for today, close out the session." / "Wrap up: what's left on this branch?" | The raw `## git` and `## tracker` blocks, a table of discrepancies between git, tracker and the transcript's claims, nothing acted on until you confirm, and a last line `next: <work> (<skill>)`. |
-| decision-ledger | "Write the spec from our interview." / "Publish the tickets; make sure nothing we decided got lost." | `.scratch/<effort>/ledger.md` with one line per settled decision and its source, and `honoured H of L live, missing M` with a file and line per hit before anything is published. |
 | red-at-base | "Add tests for this change and tell me which ones would fail without it." / "Would these tests have caught the old behaviour?" | `N of M new or changed tests fail at base (<sha>): R red, E error, G green` with the ID list from a rerun in a throwaway worktree; a green test is changed or deleted, never explained. |
 | whose-red | "The suite is red, is that me?" / "Can I skip this failing test, it looks unrelated." | One row per failing test: `mine`, `pre-existing`, `flaky` or `environment`, with the base run and repeat counts behind it, and `failing N: mine a, pre-existing b, flaky c, environment d`. |
 | structure-map | "Write down how this repo is laid out for the next session." / "Refresh the structure map." | `docs/STRUCTURE.md` under 60 lines, each entry `fact | proof: <command> | expect: <output>`, and `confirmed C, stale S` from running every proof before the map is committed. |

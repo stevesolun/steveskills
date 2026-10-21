@@ -1,5 +1,7 @@
 # decision-ledger
 
+> **Archived.** Removed in 1.9.0. Rerun at the four-repetition bar on TheAlgorithms/Python, it won the two plain asks (the baseline dropped two of twelve decisions from the tickets each time) and tied the two where the prompt said nothing may be lost; two of four is under the bar. Nothing replaces it. The page below is as it was, with the final run beneath "It's working if".
+
 An agent skill that keeps an append-only ledger of settled decisions with their source, and audits each phase artifact (spec, tickets, PR) against it before publishing, so every live decision is honoured or superseded and the implementer never re-asks a settled question. By Steve Solun. MIT.
 
 ## What it does
@@ -35,7 +37,7 @@ Three verdicts per entry: honoured (with a line number), superseded (a later ent
 ## Common questions
 
 **The audit says MISSING, but the spec does say it.**
-In other words. The script counts an explicit reference or a literal run of the decision's words; a paraphrase ("bare `ctx` follows the same rule") is invisible to it, and in the sample below that is exactly the one line out of sixteen it flagged. Tag the line with its D-number and it is found on every future audit.
+In other words. The script counts an explicit reference or a literal run of the decision's words; a paraphrase ("the same rule applies to the bare command") is invisible to it. Tag the line with its D-number and it is found on every future audit.
 
 **The user changed their mind. Do I edit the entry?**
 No. Append a new entry that supersedes the old one, with the source of the change. The old line stays, marked superseded on the next audit, so the history of the decision is readable.
@@ -49,36 +51,41 @@ Because a later round's Q1 then collides with an earlier Q1, which is one of the
 - Before a spec or ticket set goes out, an audit report shows `honoured H of L live` with a file and line per hit, and `missing 0`.
 - The implementer's prompt names the ledger path, and the implementer asks no question the ledger already answers.
 
-From the A/B that ranked this skill: an interview about adding `--format table|json|markdown` to `ctx fit`, answered from a fixed sheet of 12 decisions (three of them overruling the agent's own recommendation), then written up as a spec and tickets, twice in fresh sessions on [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7`, once with a baseline skill set and once with the same set plus this skill.
+A real run on TheAlgorithms/Python: an interview with twelve settled decisions, five of them against a recommendation, written into a spec and four tickets. The audit of the ledger against the artifacts:
 
 ```text
-$ scripts/ledger-audit.py .scratch/fit-format/ledger.md .scratch/fit-format/spec.md
-ledger audit: .scratch/fit-format/spec.md
-honoured 16 of 16 live; superseded 0; missing 0
-  D1   honoured  spec.md:55  reference D1
-  D2   honoured  spec.md:56  reference D2
-  ...
-  D16  honoured  spec.md:97  reference D16
-
-$ scripts/ledger-audit.py .scratch/fit-format/ledger.md .scratch/fit-format/issues/*.md
-ledger audit: issues/01-replace-json-with-format.md +3 files
-honoured 15 of 16 live; superseded 0; missing 1
-  D1   honoured  issues/01-replace-json-with-format.md:5   "when stdout is a tty"
-  D4   honoured  issues/01-replace-json-with-format.md:19  "no new dependency no rich"
-  ...
-  D15  MISSING   Bare `ctx` (no subcommand) runs `cmd_fit` with the default namespace, so the TTY rule in D1 applies
+$ ledger-audit.py .scratch/*/ledger.md SPEC.md tickets/*.md
+ledger audit: SPEC.md +4 files
+honoured 12 of 12 live; superseded 0; missing 0
+  D1   honoured  SPEC.md:4  reference D1
+  D2   honoured  SPEC.md:25  reference D2
+  D3   honoured  SPEC.md:34  reference D3
+  D4   honoured  SPEC.md:5  reference D4
+  D5   honoured  SPEC.md:37  reference D5
+  D6   honoured  SPEC.md:38  reference D6
+  D7   honoured  SPEC.md:39  reference D7
+  D8   honoured  SPEC.md:41  reference D8
+  D9   honoured  SPEC.md:27  reference D9
+  D10  honoured  SPEC.md:45  reference D10
+  D11  honoured  SPEC.md:47  reference D11
+  D12  honoured  SPEC.md:4  reference D12
+exit=0
 ```
 
-The missing line is a paraphrase ("bare `ctx` follows the same rule"), which the script does not count: tag the line with `(D15)` and it is found on every future audit.
+Exit code 0: every live decision has a tagged line in the spec, so a future audit finds it by reference rather than by paraphrase.
 
-| | baseline set | baseline set + decision-ledger |
-| --- | --- | --- |
-| Scripted decisions that survived into the tickets | 11 of 12 | 12 of 12 |
-| Open questions left for the implementer | 11 | 1 |
-| Rejected recommendations recorded as accepted | 0 | 0 |
-| Blind grader, skill's own success bullets | 1 of 4 | 3 of 4 |
+### A/B against a baseline skill set
 
-One repetition, one repository; the full A/B material is reproducible from the pinned commits.
+Four blind repetitions, each a fresh headless session: arm A had a baseline skill set, arm B the same set plus this skill, in a clone of [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) (about 200k stars). Two repetitions spelled the behaviour out in the prompt, two asked plainly. Pre-registered: S, decisions present in the spec and in at least one ticket (0-12); W, rejected recommendations written as the decision. Win: S = 12 and W = 0 with the skill; S <= 11 or W >= 1 without.
+
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep1 | instruction in prompt | S=12, W=no | S=12, W=no | none | A 3/4, B 4/4 |
+| rep2 | instruction in prompt | S=12, W=no | S=12, W=no | none | A 3/4, B 4/4 |
+| rep3 | plain ask | S=10, W=no | S=12, W=no | B | A 3/4, B 4/4 |
+| rep4 | plain ask | S=10, W=no | S=12, W=no | B | A 2/4, B 4/4 |
+
+Two of four: under the bar. Told that nothing decided may be lost or re-asked, the baseline carried all twelve decisions in both repetitions. Asked plainly for the spec and the tickets, it dropped two decisions from the tickets each time (the file name and the exit code once, the required seed and the standard-library rule once), while the skill arm carried all twelve with a ledger line for each. The same pattern as reconcile: the skill makes the difference only when the prompt does not say it.
 
 ## Where it fits
 
@@ -86,11 +93,7 @@ A chain step across phases: interview, spec, tickets, implementation, PR, with a
 
 ## Install
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=decision-ledger
-```
-
-Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
+Not installable since 1.9.0; the folder holds this page only.
 
 ## Files
 

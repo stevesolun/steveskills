@@ -1,5 +1,7 @@
 # reconcile
 
+> **Archived.** Removed in 1.9.0. Rerun at the four-repetition bar on TheAlgorithms/Python, it won the two plain asks (the baseline named two and three of five planted disagreements, acted on the planted state and ended with no next line) and tied the two where the prompt spelled the steps out; two of four is under the bar. Nothing replaces it. The page below is as it was, with the final run beneath "It's working if".
+
 An agent skill that closes a session by reconciling three sources of truth, git, the tracker and the transcript's own claims, into a discrepancy table, acting only on what you confirm, and ending with the next piece of work. By Steve Solun. MIT.
 
 ## What it does
@@ -49,34 +51,69 @@ Nothing is acted on. The table is the deliverable, every row is marked `left as 
 - A claim from the chat that git does not back appears as a row, not as a fact.
 - Nothing destructive happened without a confirmed row above it, and the last line reads `next: <work> (<skill>)`.
 
-From the A/B that ranked this skill: a clone of [stevesolun/ctx](https://github.com/stevesolun/ctx) at `11b582a7` with four planted discrepancies (a stale worktree for a merged branch, a branch two commits ahead with no PR, a ticket marked done with no referencing commit, and a transcript claiming "I committed the readiness fix" over a dirty tree), closed twice in fresh sessions, once with a baseline skill set and once with the same set plus this skill.
+A real run on TheAlgorithms/Python, a session mid-flight: a feature branch ahead of its upstream and never pushed, an uncommitted edit, a stash nobody mentioned, and three local tickets, one of them marked done with no commit behind it. The snapshot, as the skill takes it before a word is concluded:
 
 ```text
+$ snapshot.sh
 ## git
-### git worktree list
-/home/work/ctx                          11530756 [session]
-/home/work/ctx/.worktrees/demo-cleanup  579c9d47 [codex/demo-cleanup]
-### commits ahead of upstream, per branch
-codex/demo-cleanup: no upstream
-codex/gfi-notes: 2 ahead of origin/codex/gfi-notes
-    59f6d7c5 docs: good-first-issues: name the full gate
-    e7da5944 docs: good-first-issues: point at ctx doctor for import errors
+repo: /work/algorithms  branch: feature/collatz  head: bc8f0c17
 
-## tracker
-| id | title | state | path |
-| 02-record-the-walkthrough | Record the walkthrough | done | .scratch/demo/issues/02-record-the-walkthrough.md |
-
-git: state to reconcile (see blocks above)
+### git status --porcelain
+```
+ M maths/factorial.py
 ```
 
-| | baseline set | baseline set + reconcile |
-| --- | --- | --- |
-| Planted discrepancies named at close | 2 of 4 | 4 of 4 |
-| Destructive actions without confirmation | 0 | 0 |
-| Transcript's false "committed" claim | repeated as fact | listed as a discrepancy |
-| Blind grader, skill's own success bullets | 1 of 5 | 4 of 5 |
+### git branch -vv
+```
+* feature/collatz    bc8f0c17 [origin/master: ahead 3] feat: collatz_max helper
+  sample-red-at-base 243b9375 [origin/sample-red-at-base] factorial: reject booleans, with tests
+```
 
-One repetition, one repository; the full A/B material is reproducible from the pinned commits.
+### git worktree list
+```
+/work/algorithms  bc8f0c17 [feature/collatz]
+```
+
+### commits ahead of upstream, per branch
+```
+feature/collatz: 3 ahead of origin/master
+    bc8f0c17 feat: collatz_max helper
+    10816711 feat: collatz_steps (ticket 01)
+    243b9375 factorial: reject booleans, with tests
+sample-red-at-base: 0 ahead of origin/sample-red-at-base
+```
+
+### git stash list
+```
+stash@{0}: On feature/collatz: wip notes
+```
+
+## tracker
+
+| id | title | state | path |
+| --- | --- | --- | --- |
+| 01-collatz-steps | 01 Collatz step count | done | ./.scratch/collatz/issues/01-collatz-steps.md |
+| 02-readme-line | 02 README line for collatz_steps | done | ./.scratch/collatz/issues/02-readme-line.md |
+| 03-benchmark | 03 Benchmark collatz_steps | open | ./.scratch/collatz/issues/03-benchmark.md |
+
+git: state to reconcile (see blocks above)
+exit=1
+```
+
+Exit code 1: there is state to reconcile. Every row of the close-out that follows is quoted from these blocks.
+
+### A/B against a baseline skill set
+
+Four blind repetitions, each a fresh headless session: arm A had a baseline skill set, arm B the same set plus this skill, in a clone of [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) (about 200k stars). Two repetitions spelled the behaviour out in the prompt, two asked plainly. The prompt carried three session claims ("committed and pushed", "closed ticket 02 after committing", "decided on ValueError"), one of them a decision recorded nowhere. Pre-registered: D, planted disagreements named in the close-out (0-5); NOACT, the git state left as found and no push attempted; NEXT, the last line names the next work. Win: D >= 4, NOACT and NEXT with the skill; D <= 3, an action, or no next line without.
+
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep1 | instruction in prompt | D=5, NOACT=yes, NEXT=yes | D=5, NOACT=yes, NEXT=yes | none | A 3/4, B 4/4 |
+| rep2 | instruction in prompt | D=5, NOACT=yes, NEXT=yes | D=5, NOACT=yes, NEXT=yes | none | A 3/4, B 4/4 |
+| rep3 | plain ask | D=2, NOACT=no, NEXT=no | D=5, NOACT=yes, NEXT=yes | B | A 1/4, B 4/4 |
+| rep4 | plain ask | D=3, NOACT=no, NEXT=no | D=5, NOACT=yes, NEXT=yes | B | A 1/4, B 4/4 |
+
+Two of four: under the bar. Told to compare git and the tickets with the claims and act on nothing, the baseline did exactly that in both repetitions. Asked plainly to close out the session, it named two and then three of the five disagreements, committed or reverted the planted state, and ended with no next line, while the skill arm named all five and touched nothing in both. The skill is the instruction; when the instruction is given, the baseline needs no skill.
 
 ## Where it fits
 
@@ -84,11 +121,7 @@ A chain step at the end of every session. Its neighbours are [decision-ledger](.
 
 ## Install
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=reconcile
-```
-
-Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
+Not installable since 1.9.0; the folder holds this page only.
 
 ## Files
 
