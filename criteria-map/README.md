@@ -13,8 +13,6 @@ Type `/criteria-map`, or the agent reaches for it on its own when a task fits: p
 | Situation | Reach for |
 | --- | --- |
 | The proposal will be scored against a published list | this skill |
-| The draft's sentences need support or softening | [cite-or-cut](../cite-or-cut) |
-| A section must cite only the files the author collected | [source-bound](../source-bound) |
 
 A document with no stated criteria has nothing to map.
 
@@ -90,7 +88,7 @@ Three wins of four. The baseline left Goals and Non-Goals thin without saying so
 
 ## Where it fits
 
-A reach-for-it-anytime standalone for the research role. Its neighbours are [cite-or-cut](../cite-or-cut), because once the sections are drafted their sentences still have to earn their claims, and [source-bound](../source-bound), because a proposal's background section drawn from a folder of papers has to cite only those papers. The index of every skill is the [root README](../README.md#skills).
+A reach-for-it-anytime standalone for the research role. Its neighbour is [number-trace](../number-trace), because a figure the proposal does quote has to trace to the author's material, as a summary's figures trace to the source. The index of every skill is the [root README](../README.md#skills).
 
 ## Install
 

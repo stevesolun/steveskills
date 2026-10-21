@@ -7,6 +7,7 @@ Every skill here follows the same rules:
 - **One job.** Each folder does one thing and says in its description exactly when it should and should not fire.
 - **Numbers, not advice.** Where a skill makes a claim about tokens, time or correctness, it ships the script that measures it and reports before and after numbers.
 - **Fixes live in the environment.** A skill leaves behind a flag, a script, a check or a config, never a paragraph in a steering file that every session has to re-read.
+- **Beats the baseline, or it is not here.** Before a skill is listed it runs in a blind A/B against a baseline skill set, with the metric and the win condition written down first; a skill that does not win is removed and its page stays as an archive. The [benchmark](#the-benchmark) section has the procedure and every result.
 - **One copy, every harness.** Written to the open [Agent Skills](https://agentskills.io) format, with Codex and ChatGPT picker metadata beside it, so the same folder works in Claude Code, Codex, ChatGPT, Copilot, Cursor and anything else that reads the standard.
 
 The directory grows one folder at a time. The table below is the index.
@@ -19,7 +20,7 @@ Each skill started from a failure seen in a real session, and each one ends in a
 | --- | --- |
 | **The agent grades its own work.** "Tests pass", "done", "the criteria are met": claims with no run behind them. | [acceptance-probes](./acceptance-probes), [red-at-base](./red-at-base), [whose-red](./whose-red), [reconcile](./reconcile) |
 | **A number arrives without its receipt.** A figure nobody can rerun, a move explained by a guess, an analytics agent that drifted since it was last checked. | [with-receipts](./with-receipts), [driver-split](./driver-split), [answer-key](./answer-key), [clean-log](./clean-log), [ab-readout](./ab-readout) |
-| **The write-up drifts from its sources.** A summary with a remembered figure, a memo citing a file nobody gave, a claim that outruns its evidence, a proposal thin on the criterion that scores. | [number-trace](./number-trace), [source-bound](./source-bound), [cite-or-cut](./cite-or-cut), [criteria-map](./criteria-map) |
+| **The write-up drifts from its sources.** A summary with a remembered figure, a proposal thin on the criterion that scores. | [number-trace](./number-trace), [criteria-map](./criteria-map) |
 | **The session pays for what it does not use.** Fat tool results, a repository re-learned every morning, decisions lost between phases, a task done bigger instead of deeper. | [tool-diet](./tool-diet), [structure-map](./structure-map), [decision-ledger](./decision-ledger), [deeper](./deeper) |
 
 ## Skills
@@ -54,11 +55,34 @@ Every skill is model-invoked: the agent reaches for it when a task matches its d
 | Skill | What it does |
 | --- | --- |
 | [number-trace](./number-trace) | Summarises a paper, report or analysis so that every number in the summary traces to the source text or a computed output, and every number that does not is labelled assumed, remembered or missing. |
-| [source-bound](./source-bound) | Builds a memo or literature map from the sources given and nothing else: inventories what could be read, resolves every citation against it, marks single-source points, and lists the unreadable and the unused. |
-| [cite-or-cut](./cite-or-cut) | Revises a draft in the author's voice with a scan that lists, by line, every sentence that asserts without support or overstates the evidence, and edits them as original-then-revised pairs. |
 | [criteria-map](./criteria-map) | Drafts a proposal against the criteria it will be judged on and maps it: words per criterion, the thin and the unmapped, and every placeholder still open. |
 
 More folders will land here, one at a time. The [CHANGELOG](./CHANGELOG.md) records each release.
+
+## The benchmark
+
+Every skill is screened the same way before it stays in the index:
+
+1. **Two arms, fresh headless sessions.** Arm A runs a baseline set of well-known agent skills; arm B runs the same set plus the candidate. Both get the same task on real material from repositories with 100k or more stars.
+2. **Pre-registered.** The metric is computed by the screener's own script from the arm's files, never from the candidate's script, and the win condition is written down before the arms launch. A rule is never changed after the arms have run; a measurement bug fixed to match the written definition is disclosed in the README.
+3. **Two designs, four repetitions.** Two repetitions with the behaviour spelled out in the prompt, two with the plain ask. Pass: the candidate wins at least three of the four. A blind grader also scores both arms against the skill's own "it's working if" bullets, relabelled by a coin flip; it is reported, and it is not the pass bar.
+4. **Losers go.** A skill that fails is removed from the index and the plugin; its README stays as an archived page with the result at the top.
+
+| Skill | Screening | Result |
+| --- | --- | --- |
+| acceptance-probes | 1 repetition, planted already-true criterion | passed |
+| reconcile | 1 repetition, 4 planted discrepancies | passed |
+| decision-ledger | 1 repetition, 12 scripted decisions | passed |
+| red-at-base | 1 repetition, planted green-at-base test | passed |
+| structure-map | 1 repetition, proofs rerun independently | passed |
+| criteria-map | 4 repetitions, two designs | passed, 3 of 4 |
+| number-trace | 4 repetitions, two designs, rerun under the corrected unit rule | passed, 3 of 4 |
+| whose-red | 1 repetition; the pre-registered metric could not separate the arms | re-screening pending |
+| tool-diet, deeper, with-receipts, driver-split, answer-key, clean-log, ab-readout | not yet screened | pending; each is removed if it fails |
+| source-bound | 4 repetitions, two designs, four ties | removed in 1.7.0 ([page](./source-bound)) |
+| cite-or-cut | 4 repetitions, two designs, no win | removed in 1.7.0 ([page](./cite-or-cut)) |
+
+The engineering rows were screened with one repetition each before the four-repetition bar existed; they are rerun under it next, after the pending rows.
 
 ## Install
 
@@ -131,8 +155,6 @@ Prompts that make the agent reach for each skill without being told, and what co
 | clean-log | "Clean this export and tell me everything you changed." | The cleaning as a script with dropped rows in a side file, and a log computed from the two files: rows by key, columns, cells changed per column by kind with examples, both checksums. |
 | ab-readout | "Write up the checkout test and tell me whether to ship it." | SRM check, rate per arm with interval, lift with interval and p-value, smallest detectable effect and sample needed, then one verdict line that is the only recommendation. |
 | number-trace | "Help me understand this paper, with the key numbers quoted." / "Write up the analysis of this file using only numbers you computed." | One row per number in the summary: the source line it matched, `labelled` for a figure the summary marks as computed or assumed, or NOT FOUND; `numbers: N in doc, F found, L labelled, M not found`, exit 1 while any is unfound. |
-| source-bound | "Turn this folder of papers into a memo." / "Map my literature from the PDFs I collected." | The inventory (readable or not, per file), citations resolved against it, UNRESOLVED ones named, unused files listed, sentences resting on one source marked. |
-| cite-or-cut | "Revise this section before I send it to my advisor." / "Which sentences need a citation?" | The one structural issue, the flow, edit pairs, and `claims: C, unsupported U, overstated O` by line, before and after the pass. |
 | criteria-map | "Draft the grant against these review criteria." / "Which criteria does my proposal address weakly?" | Words and share per criterion, the mapped sections, NONE and THIN flags, and every placeholder with its line. |
 
 Every skill ends in a number or an artifact a second pair of eyes can check, never in the agent's own assessment of its work.

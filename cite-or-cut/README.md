@@ -1,5 +1,7 @@
 # cite-or-cut
 
+> **Archived.** Removed in 1.7.0. In four blind repetitions against a baseline skill set the baseline fixed all nine planted defects every time, with or without the instruction in the prompt, so the skill never beat it on the pre-registered counts; the grader's preference for its edit pairs is not the benchmark. Nothing replaces it; for a summary's numbers use [number-trace](../number-trace), for a proposal against its criteria [criteria-map](../criteria-map). The page below is as it was.
+
 An agent skill for revising a draft section in the author's voice: the one structural issue, the argument flow, line-level edits as original then revised, and a scan that lists every sentence asserting something without support or asserting more than the evidence carries. By Steve Solun. MIT.
 
 ## What it does
@@ -14,7 +16,6 @@ Type `/cite-or-cut`, or the agent reaches for it on its own when a task fits: re
 | --- | --- |
 | The draft's claims need support or softening, number or not | this skill |
 | The summary's numbers must come from the source | [number-trace](../number-trace) |
-| The memo's citations must resolve to the files the reader gave | [source-bound](../source-bound) |
 
 Writing new content, or adding results and citations the author did not supply, is outside it.
 
@@ -80,15 +81,11 @@ The baseline fixed all nine defects in every repetition. The skill arm left one 
 
 ## Where it fits
 
-A reach-for-it-anytime standalone for the research role. Its neighbours are [source-bound](../source-bound), because a citation can resolve to a file the reader gave and still claim more than the file supports, and [number-trace](../number-trace), because a claim with a figure in it needs the figure traced as well as the sentence supported. The index of every skill is the [root README](../README.md#skills).
+A reach-for-it-anytime standalone for the research role. Its neighbours are [number-trace](../number-trace), because a claim with a figure in it needs the figure traced as well as the sentence supported, and [criteria-map](../criteria-map), because a proposal's sentences have to earn their claims after its sections are mapped. The index of every skill is the [root README](../README.md#skills).
 
 ## Install
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=cite-or-cut
-```
-
-Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
+Not installable since 1.7.0; the folder holds this page only.
 
 ## Files
 

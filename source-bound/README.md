@@ -1,5 +1,7 @@
 # source-bound
 
+> **Archived.** Removed in 1.7.0. In four blind repetitions against a baseline skill set (two with the instruction in the prompt, two with the plain ask) the baseline matched it on every pre-registered count: it read the folder, reported the unreadable files and cited by file name on its own. Nothing replaces it; for a summary's numbers use [number-trace](../number-trace), for a proposal against its criteria [criteria-map](../criteria-map). The page below is as it was.
+
 An agent skill for building a memo or a literature map from the sources the user supplied and nothing else: it inventories what was given and what could be read, cites every claim to a source and section, resolves every citation against the inventory, marks the points that rest on a single source, and lists the sources that were unreadable or unused. By Steve Solun. MIT.
 
 ## What it does
@@ -100,11 +102,7 @@ A reach-for-it-anytime standalone for the research role. Its neighbours are [num
 
 ## Install
 
-```bash
-npx skills@latest add stevesolun/steveskills --skill=source-bound
-```
-
-Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
+Not installable since 1.7.0; the folder holds this page only.
 
 ## Files
 

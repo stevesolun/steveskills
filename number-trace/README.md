@@ -13,8 +13,6 @@ Type `/number-trace`, or the agent reaches for it on its own when a task fits: s
 | Situation | Reach for |
 | --- | --- |
 | The summary's numbers must come from the source | this skill |
-| The memo's citations must resolve to the files the reader gave | [source-bound](../source-bound) |
-| The draft's claims need support or softening, number or not | [cite-or-cut](../cite-or-cut) |
 
 Prose with no numbers is a citation check, not a trace.
 
@@ -93,9 +91,20 @@ Four blind repetitions, each a fresh headless session: arm A had a baseline skil
 
 By the pre-registered rule the skill won none of the four. Its one unlabelled row in every repetition is the same figure, `1,048,576 bytes`, which the appendix carries under a column header where the screener's unit rule cannot see it (the script now marks such rows `unit apart`). The baseline's unlabelled figures were 2 and 1 with the instruction in the prompt, and 13 and 3 on the plain ask: computed and remembered figures (86,400 s, 8.6 TB, 100 objects per second) written as if quoted. The blind grader, scoring the bullets above without knowing which arm was which, put the skill arm at 4/4 in all four repetitions and the baseline at 2 or 3.
 
+By that rule the skill won none of the four. Its one unlabelled row in every repetition was the same figure, `1,048,576 bytes`, which the appendix carries in a table whose column header holds the unit, where the rule's "number with its unit" test cannot see it. Measured after the fact with that case counted as found (and nothing else changed: a computed `100 objects per second` stays unfound, since no header says objects), repetitions 1 to 4 read three wins and one tie; measured after the fact, they do not count. Four fresh repetitions were run under the corrected rule, written down before launch, with the same pass bar as the other skills, three of four:
+
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep5 | instruction in prompt | N=28, F=24, L=3, U=1 | N=23, F=18, L=5, U=0 | B | A 3/4, B 4/4 |
+| rep6 | instruction in prompt | N=24, F=24, L=0, U=0 | N=20, F=17, L=3, U=0 | none | A 3/4, B 4/4 |
+| rep7 | plain ask | N=24, F=16, L=1, U=7 | N=21, F=13, L=8, U=0 | B | A 3/4, B 4/4 |
+| rep8 | plain ask | N=34, F=24, L=0, U=10 | N=17, F=11, L=6, U=0 | B | A 2/4, B 4/4 |
+
+Three of four: passed. The tie (repetition 6) is the baseline labelling every outside figure when the prompt told it to; on the plain ask it wrote 7 and then 10 figures as if quoted (86,400 seconds in a day, 24 x, 60 x, a 75 ms transatlantic one-way latency) against none for the skill arm. The blind grader put the skill arm at 4/4 in all eight repetitions and the baseline at 2 or 3.
+
 ## Where it fits
 
-A reach-for-it-anytime standalone for the research and data roles. Its neighbours are [source-bound](../source-bound), because a memo's citations and its numbers are two different checks and a memo with figures needs both, and [cite-or-cut](../cite-or-cut), because a claim can be unsupported with no number in it. The index of every skill is the [root README](../README.md#skills).
+A reach-for-it-anytime standalone for the research and data roles. Its neighbour is [criteria-map](../criteria-map), because a proposal's figures have to come from the author's material as a summary's come from the source. The index of every skill is the [root README](../README.md#skills).
 
 ## Install
 

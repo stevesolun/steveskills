@@ -1,5 +1,14 @@
 # steveskills
 
+## 1.7.0
+
+### Minor Changes
+
+- The benchmark is now the bar for being listed: a blind A/B against a baseline skill set, metric and win condition written down first, two designs, four repetitions, pass at three of four; a skill that fails is removed and its page stays as an archive. The root README carries the procedure and every result.
+- Remove **`source-bound`**: four ties of four. The baseline read the folder, reported the unreadable files and cited by file name on its own, with or without the instruction. Nothing replaces it; its page stays, archived.
+- Remove **`cite-or-cut`**: no win of four. The baseline fixed all nine planted defects every time; the grader's preference for the skill's edit pairs is not the benchmark. Nothing replaces it; its page stays, archived.
+- `number-trace` rerun under the corrected unit rule (a number in a table whose column header carries the unit counts as found, flagged `unit apart`), four fresh repetitions: passed, three of four.
+
 ## 1.6.0
 
 ### Minor Changes
