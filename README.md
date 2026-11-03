@@ -54,8 +54,6 @@ Every skill is model-invoked: the agent reaches for it when a task matches its d
 
 More folders will land here, one at a time. The [CHANGELOG](./CHANGELOG.md) records each release.
 
-A folder present in the repository but absent from these tables is a **candidate**: built and tested by hand, not yet through the benchmark, installable by name with the skills CLI, and not in the plugin. Candidates now: [micromanager](./micromanager), a supervisor that drives a board of tickets through agent workers, treats a diff that has not moved as stale, and verifies every claim before it closes.
-
 ## The benchmark
 
 Every skill is screened the same way before it stays in the index:
@@ -84,7 +82,7 @@ Every skill is screened the same way before it stays in the index:
 | deeper | 4 repetitions, two designs, four ties; retested on a task where the shipped benchmark misleads: one win, one tie, two runs that spent the hour without an answer | removed in 1.8.0, stays out ([page](./deeper)) |
 | source-bound | 4 repetitions, two designs, four ties | removed in 1.7.0 ([page](./source-bound)) |
 | cite-or-cut | 4 repetitions, two designs, no win | removed in 1.7.0 ([page](./cite-or-cut)) |
-| micromanager | not yet run; design pre-registered on its page | candidate ([page](./micromanager)) |
+| micromanager | running: design pre-registered on its page | pending ([page](./micromanager)) |
 
 ## Install
 

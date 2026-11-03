@@ -1,9 +1,5 @@
 # steveskills
 
-## Unreleased
-
-- Add the candidate **`micromanager`**: a supervisor skill that hands tickets out from a board, fingerprints each worker's worktree on a fixed cadence (quiet means the diff has not moved, whatever the worker says), climbs a three-rung ladder on stale tickets (ask for the diff, re-brief with the gap named, replace with a handoff), parks human decisions with their exact question, verifies every "done" against the acceptance criteria before anything closes, and counts its own idle seat-minutes. Tested on a simulated board and one live run with a real worker subagent. Not in the index or the plugin until it passes the benchmark; its page carries the pre-registered design.
-
 ## 1.9.0
 
 ### Minor Changes
