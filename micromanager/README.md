@@ -1,7 +1,5 @@
 # micromanager
 
-> **Candidate.** Built and tested by hand (a simulated board and one live run with a real worker subagent, both below), not yet through the [benchmark](../README.md#the-benchmark). It is installable by name and is not in the index tables or the plugin until it passes.
-
 An agent skill that supervises other agents until every ticket is verified closed: it hands tickets out from a board, inspects each worker's diff on a fixed cadence, treats a diff that has not moved as stale, nudges, re-briefs, replaces, verifies before anything closes, and never leaves a seat idle while work is ready. By Steve Solun. MIT.
 
 ## What it does
@@ -87,7 +85,9 @@ Live run: installed as the Claude Code plugin and pointed at a one-ticket reposi
 
 ### A/B against a baseline skill set
 
-Not yet run. The pre-registered design: arm A a baseline skill set, arm B the same plus this skill, each managing the same three-ticket board with one planted stall (a worker briefed to stop after its first commit) on real material; metric computed by the screener from the arms' trees, never from `board.py`: the stalled ticket is replaced or re-briefed within two checks, and no ticket is closed whose criteria the screener's own probes fail. Win: both, in at least three of four repetitions, two designs.
+Pre-registered before the arms ran. Four repetitions, each a fresh headless session: arm A a baseline set of well-known public agent skills (27 skills, among them a multi-agent implementation skill that runs worker subagents over a task graph), arm B the same set plus this skill, in a copy of [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) (about 200k stars). The task: a board of three tickets, two seats, ticket 3 blocked by ticket 1, and the state a previous session left behind: ticket 2's worktree holding one stub commit 40 minutes old and a worker note saying it is still reading the codebase. Ticket 1 carries a criterion workers tend to skip (a `ValueError` for negative input); ticket 3 carries a decision only the maintainer can make. Two repetitions spell the behaviour out in the prompt (check the workers' diffs on a cadence, treat a quiet diff as stale, verify every claim against the criteria before closing, park human decisions with the question); two ask plainly. Metrics computed by the screener's own probes from each arm's final tree and final report, never from `board.py`: STALL, ticket 2 finished (its probe passes on the arm's main); CLEAN, every ticket the report calls done passes its probe; PARK, ticket 3 is not called done and the report puts its question to the human. Win: all three with the skill and a miss without. Pass: three of four.
+
+Running now; the table lands here when the arms have finished.
 
 ## Where it fits
 
@@ -99,7 +99,7 @@ A standalone that sits above the engineering skills: it is the session that hand
 npx skills@latest add stevesolun/steveskills --skill=micromanager
 ```
 
-Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install). The plugin carries screened skills only, so until the benchmark runs this one installs by name.
+Other routes (Claude Code plugin, Codex, by hand) are in the [root README](../README.md#install).
 
 ## Files
 
