@@ -1,5 +1,11 @@
 # steveskills
 
+## 1.9.1
+
+### Patch Changes
+
+- Screen **`micromanager`**, a supervisor skill that hands tickets to worker subagents, fingerprints each worker's worktree so a diff that has not moved is stale whatever the worker says, climbs a nudge, re-brief, replace ladder, parks human decisions with the question, and verifies every claimed done before closing. Four repetitions, two designs, on TheAlgorithms/Python with a planted 40-minute stall, a skippable `ValueError` criterion and a maintainer-only decision: four ties of four. Every arm, baseline included, replaced the stalled worker, verified both tickets and parked the question within five minutes, and the skill did not fire in one plain-ask repetition. Not listed; its page stays, archived, with the table and the pre-registered design. The plugin is unchanged.
+
 ## 1.9.0
 
 ### Minor Changes

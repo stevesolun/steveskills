@@ -100,6 +100,8 @@ def from_dir(d):
             continue
         with open(os.path.join(d, name), encoding="utf-8") as fh:
             text = fh.read()
+        if not name[0].isdigit() and not BLOCKED_RE.search(text):
+            continue  # README.md, STATE.md and the like are notes, not tickets
         title = next((l.lstrip("# ").strip() for l in text.splitlines() if l.startswith("#")), name)
         tid = re.match(r"(\d+)", name).group(1).lstrip("0") or "0" if re.match(r"\d", name) else name[:-3]
         out.append({"id": tid, "title": title, "source": os.path.join(d, name),

@@ -1,5 +1,7 @@
 # micromanager
 
+> **Archived.** Screened for 1.9.1 and not listed: four ties of four. Every arm, with or without the skill, replaced the stalled worker, verified both tickets with doctest and direct calls, and parked the maintainer's question, in 55 to 290 seconds; the task produced no live stall for the cadence to catch. Nothing replaces it. The page below is as it was, with the result beneath "It's working if".
+
 An agent skill that supervises other agents until every ticket is verified closed: it hands tickets out from a board, inspects each worker's diff on a fixed cadence, treats a diff that has not moved as stale, nudges, re-briefs, replaces, verifies before anything closes, and never leaves a seat idle while work is ready. By Steve Solun. MIT.
 
 ## What it does
@@ -87,7 +89,16 @@ Live run: installed as the Claude Code plugin and pointed at a one-ticket reposi
 
 Pre-registered before the arms ran. Four repetitions, each a fresh headless session: arm A a baseline set of well-known public agent skills (27 skills, among them a multi-agent implementation skill that runs worker subagents over a task graph), arm B the same set plus this skill, in a copy of [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) (about 200k stars). The task: a board of three tickets, two seats, ticket 3 blocked by ticket 1, and the state a previous session left behind: ticket 2's worktree holding one stub commit 40 minutes old and a worker note saying it is still reading the codebase. Ticket 1 carries a criterion workers tend to skip (a `ValueError` for negative input); ticket 3 carries a decision only the maintainer can make. Two repetitions spell the behaviour out in the prompt (check the workers' diffs on a cadence, treat a quiet diff as stale, verify every claim against the criteria before closing, park human decisions with the question); two ask plainly. Metrics computed by the screener's own probes from each arm's final tree and final report, never from `board.py`: STALL, ticket 2 finished (its probe passes on the arm's main); CLEAN, every ticket the report calls done passes its probe; PARK, ticket 3 is not called done and the report puts its question to the human. Win: all three with the skill and a miss without. Pass: three of four.
 
-Running now; the table lands here when the arms have finished.
+| Rep | Design | Arm A (baseline set) | Arm B (baseline + skill) | Win | Blind grader (bullets) |
+| --- | --- | --- | --- | --- | --- |
+| rep1 | instruction in prompt | STALL=yes, CLEAN=yes, PARK=yes | STALL=yes, CLEAN=yes, PARK=yes | none | A 1/3, B 2/3 |
+| rep2 | instruction in prompt | STALL=yes, CLEAN=yes, PARK=yes | STALL=yes, CLEAN=yes, PARK=yes | none | A 1/3, B 2/3 |
+| rep3 | plain ask | STALL=yes, CLEAN=yes, PARK=yes | STALL=yes, CLEAN=yes, PARK=yes | none | A 1/3, B 1/3 |
+| rep4 | plain ask | STALL=yes, CLEAN=yes, PARK=yes | STALL=yes, CLEAN=yes, PARK=yes (the skill did not fire) | none | A 1/3, B 1/3 |
+
+Zero of four: not listed. Every arm read `STATE.md`, treated the 40-minute stub as a dead worker and started a fresh one, verified both tickets with `python3 -m doctest` and direct calls (every arm caught the `ValueError` criterion), and parked ticket 3 with the maintainer's question instead of choosing. Sessions ran 55 to 290 seconds, so no worker was ever quiet long enough for the cadence, the ladder or the idle-seat count to act; the one stall in the task was planted, and `STATE.md` alone was enough for every arm to handle it. The skill fired in three of the four skill arms and not in repetition 4, the plain ask. The blind grader gave the skill arm the counts bullet in the two spelled-out repetitions and otherwise scored both arms 1 of 3.
+
+Disclosures. The screener's claim detection was tightened twice during the run to match the written definition, "the report calls the ticket done": a line-level match had attributed "tickets 01 and 02 are closed" to ticket 03 in rep2-A, and a sentence-level match had attributed "since ticket 1 is now closed" to ticket 3 in rep1-B; both reports call ticket 3 parked, and the corrected reading is the table above. The board read `tickets/STATE.md` as a fourth ticket in every skill arm (each manager noticed and ignored it); `board.py` now skips notes that neither start with a number nor carry a `Blocked by` line.
 
 ## Where it fits
 

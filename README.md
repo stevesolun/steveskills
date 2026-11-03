@@ -82,7 +82,7 @@ Every skill is screened the same way before it stays in the index:
 | deeper | 4 repetitions, two designs, four ties; retested on a task where the shipped benchmark misleads: one win, one tie, two runs that spent the hour without an answer | removed in 1.8.0, stays out ([page](./deeper)) |
 | source-bound | 4 repetitions, two designs, four ties | removed in 1.7.0 ([page](./source-bound)) |
 | cite-or-cut | 4 repetitions, two designs, no win | removed in 1.7.0 ([page](./cite-or-cut)) |
-| micromanager | running: design pre-registered on its page | pending ([page](./micromanager)) |
+| micromanager | 4 repetitions, two designs, four ties: every arm handled the planted stall, verified both tickets and parked the maintainer's question | not listed, screened for 1.9.1 ([page](./micromanager)) |
 
 ## Install
 
