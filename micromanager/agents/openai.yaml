@@ -1,0 +1,3 @@
+interface:
+  display_name: "Micromanager"
+  short_description: "Drive agent workers to verified done"
